@@ -58,6 +58,7 @@
       text-shadow: 0 1px 4px rgba(0,0,0,0.2);
       white-space: nowrap;
       opacity: 0.9;
+      animation: lingoBreath 4s ease-in-out infinite alternate;
     }
     @keyframes lingoBreath {
       from { transform: scale(1.4); opacity: 0.9; }
@@ -65,25 +66,17 @@
     }
     </style>
     <script>
-      // Scatter phrases randomly across the banner
       const phrases = document.querySelectorAll('.lingo-phrases span');
       function scatter() {
-        phrases.forEach((span) => {
-          const x = Math.random() * (window.innerWidth - 160);
-          const y = 14 + Math.random() * 28;
-          const dur = (2.5 + Math.random() * 3.5).toFixed(1);
-          const del = (Math.random() * 8).toFixed(1);
+        phrases.forEach((span, i) => {
+          const x = (i * 137 + Math.random() * 80) % (window.innerWidth - 160);
+          const y = 14 + (i * 41 % 28);
           span.style.left = x + 'px';
           span.style.top  = y + 'px';
-          span.style.animationDuration = dur + 's';
-          span.style.animationDelay = -del + 's';
-          span.style.animationTimingFunction = 'ease-in-out';
-          span.style.animationIterationCount = 'infinite';
-          span.style.animationDirection = 'alternate';
-          span.style.animationName = 'lingoBreath';
+          span.style.animationDelay = -(Math.random() * 6).toFixed(1) + 's';
         });
       }
-      window.addEventListener('DOMContentLoaded', () => setTimeout(scatter, 50));
+      window.addEventListener('load', scatter);
       window.addEventListener('resize', scatter);
     </script>
 
