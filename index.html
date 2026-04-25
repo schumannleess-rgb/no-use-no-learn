@@ -58,7 +58,6 @@
       text-shadow: 0 1px 4px rgba(0,0,0,0.2);
       white-space: nowrap;
       opacity: 0.9;
-      animation: lingoBreath 4s ease-in-out infinite alternate;
     }
     @keyframes lingoBreath {
       from { transform: scale(1.4); opacity: 0.9; }
@@ -71,16 +70,22 @@
         phrases.forEach((span, i) => {
           const w = window.innerWidth;
           const n = phrases.length;
-          const x = (w / n) * i + Math.random() * (w / n / 2) - 20;
-          const y = 10 + (i % 3) * 16;
+          const x = Math.max(0, (w / n) * i + Math.random() * (w / n / 2) - 30);
+          const y = 8 + (i % 4) * 12;
           const dur = (3 + (i % 4) * 0.75).toFixed(2);
+          span.style.position = 'absolute';
           span.style.left = x + 'px';
           span.style.top  = y + 'px';
           span.style.animationDuration = dur + 's';
+          span.style.animationTimingFunction = 'ease-in-out';
+          span.style.animationIterationCount = 'infinite';
+          span.style.animationDirection = 'alternate';
           span.style.animationDelay = -(Math.random() * 5).toFixed(2) + 's';
+          span.style.animationName = 'lingoBreath';
         });
       }
-      setTimeout(scatter, 100);
+      setTimeout(scatter, 50);
+    </script>
     </script>
 
     <!-- ── Main Page Styles (second style block) ── -->
