@@ -21,6 +21,9 @@
       --danger: #ef4444;
       --radius: 16px;
       --shadow: 0 2px 12px rgba(0,0,0,0.1);
+      --scene-report: #5b6af0;
+      --scene-chat: #10b981;
+      --scene-meeting: #8b5cf6;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -151,20 +154,21 @@
       margin: 0;
       pointer-events: none;
     }
+    .sentence-card .card-left-bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+    }
+    .sentence-card .card-left-bar.report { background: var(--scene-report); }
+    .sentence-card .card-left-bar.chat  { background: var(--scene-chat); }
+    .sentence-card .card-left-bar.meeting { background: var(--scene-meeting); }
     .sentence-card .en-text {
       flex: 1;
       font-size: 15px;
       line-height: 1.5;
       color: #1a1a2e;
-    }
-    .sentence-card .scene-tag {
-      font-size: 11px;
-      color: #5b6af0;
-      background: rgba(91,106,240,0.1);
-      border-radius: 6px;
-      padding: 2px 8px;
-      white-space: nowrap;
-      margin-right: 8px;
     }
     .sentence-card .icon-btn {
       width: 36px;
@@ -578,9 +582,9 @@
       }
 
       container.innerHTML = active.map(s => `
-        <div class="sentence-card" data-id="${s.id}">
-          <span class="scene-tag">${s.scene}</span>
-          <span class="en-text">${s.en}</span>
+        <div class="sentence-card" data-id="${s.id}" data-scene="${s.scene}">
+          <div class="card-left-bar ${s.scene === '汇报' ? 'report' : s.scene === '闲聊' ? 'chat' : 'meeting'}"></div>
+          <div class="en-text">${s.en}</div>
           <button class="icon-btn speak" onclick="speak('${s.id}')" title="发音">🔊</button>
           <button class="icon-btn done" onclick="markLearned(${s.id})" title="学会了">✓</button>
         </div>
