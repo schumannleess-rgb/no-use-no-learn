@@ -63,31 +63,35 @@
       animation-direction: alternate;
     }
     @keyframes lingoBreath {
-      0%   { transform: scale(0.75); opacity: 0; }
-      20%  { opacity: 0.5; }
-      100% { transform: scale(1.3); opacity: 0.15; }
+      0%   { transform: scale(var(--scale-max, 1.2)); opacity: 0.05; }
+      50%  { transform: scale(0.7); opacity: 0.9; }
+      100% { transform: scale(1); opacity: 0.15; }
     }
     </style>
     <script>
       // Scatter phrases randomly across the banner
       const phrases = document.querySelectorAll('.lingo-phrases span');
-      const bannerW = () => document.querySelector('.lingo-banner').offsetWidth;
-      const bannerH = 56;
-      phrases.forEach((span, i) => {
-        // Random position across the area (avoid edges)
-        const x = Math.random() * (bannerW() - 180) + 10;
-        const y = 14 + Math.random() * (bannerH - 36);
-        // Random animation speed and delay
-        const dur = (3 + Math.random() * 3).toFixed(1); // 3-6s
-        const del = (Math.random() * 6).toFixed(1);     // 0-6s stagger
-        span.style.cssText = `
-          left: ${x}px;
-          top: ${y}px;
-          animation-duration: ${dur}s;
-          animation-delay: -${del}s;
-          animation-name: lingoBreath;
-        `;
-      });
+      function scatter() {
+        const bw = document.querySelector('.lingo-banner').offsetWidth;
+        const bh = 56;
+        phrases.forEach((span) => {
+          const x = Math.random() * (bw - 200) + 20;
+          const y = 12 + Math.random() * (bh - 38);
+          const dur = (2.5 + Math.random() * 3.5).toFixed(1);
+          const del = (Math.random() * 6).toFixed(1);
+          const scaleMax = 0.9 + Math.random() * 0.6;
+          span.style.cssText = `
+            left: ${x}px;
+            top: ${y}px;
+            animation-duration: ${dur}s;
+            animation-delay: -${del}s;
+            --scale-max: ${scaleMax};
+            animation-name: lingoBreath;
+          `;
+        });
+      }
+      window.addEventListener('load', scatter);
+      window.addEventListener('resize', scatter);
     </script>
 
     /* ── Header ── */
