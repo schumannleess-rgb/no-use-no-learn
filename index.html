@@ -106,7 +106,18 @@
       font-size: 13px;
       color: rgba(255,255,255,0.7);
       margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
+    .scene-dot {
+      font-size: 8px;
+      margin-right: 1px;
+    }
+    .scene-dot.report   { color: #5b6af0; }
+    .scene-dot.chat     { color: #10b981; }
+    .scene-dot.meeting  { color: #8b5cf6; }
+    .scene-dot + span:last-child { margin-left: 8px; }
 
     /* ── Sentences ── */
     .section-title {
@@ -133,7 +144,6 @@
       background: rgba(255,255,255,0.92);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.6);
       border-radius: var(--radius);
       box-shadow: 0 4px 24px rgba(0,0,0,0.15), 0 1px 4px rgba(0,0,0,0.08);
       padding: 14px 16px;
@@ -154,16 +164,9 @@
       margin: 0;
       pointer-events: none;
     }
-    .sentence-card .card-left-bar {
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-    }
-    .sentence-card .card-left-bar.report { background: var(--scene-report); }
-    .sentence-card .card-left-bar.chat  { background: var(--scene-chat); }
-    .sentence-card .card-left-bar.meeting { background: var(--scene-meeting); }
+    .sentence-card.report { border: 2px solid rgba(91,106,240,0.35); }
+    .sentence-card.chat   { border: 2px solid rgba(16,185,129,0.35); }
+    .sentence-card.meeting { border: 2px solid rgba(139,92,246,0.35); }
     .sentence-card .en-text {
       flex: 1;
       font-size: 15px;
@@ -461,7 +464,11 @@
 
   <header>
     <div class="lang-badge">🇬🇧 英语</div>
-    <div class="subtitle">外企工作 · 汇报 · 闲聊 · 会议</div>
+    <div class="subtitle">
+      <span class="scene-dot report">●</span>汇报
+      <span class="scene-dot chat">●</span>闲聊
+      <span class="scene-dot meeting">●</span>会议
+    </div>
   </header>
 
   <div class="section-title">句子库 · <span id="count">9</span> 句</div>
@@ -582,8 +589,7 @@
       }
 
       container.innerHTML = active.map(s => `
-        <div class="sentence-card" data-id="${s.id}" data-scene="${s.scene}">
-          <div class="card-left-bar ${s.scene === '汇报' ? 'report' : s.scene === '闲聊' ? 'chat' : 'meeting'}"></div>
+        <div class="sentence-card ${s.scene === '汇报' ? 'report' : s.scene === '闲聊' ? 'chat' : 'meeting'}" data-id="${s.id}" data-scene="${s.scene}">
           <div class="en-text">${s.en}</div>
           <button class="icon-btn speak" onclick="speak('${s.id}')" title="发音">🔊</button>
           <button class="icon-btn done" onclick="markLearned(${s.id})" title="学会了">✓</button>
