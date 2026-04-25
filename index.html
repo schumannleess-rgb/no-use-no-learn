@@ -63,9 +63,8 @@
       animation-direction: alternate;
     }
     @keyframes lingoBreath {
-      0%   { transform: scale(1.4); opacity: 0.95; }
-      50%  { transform: scale(0.7); opacity: 0.4; }
-      100% { transform: scale(1.4); opacity: 0.95; }
+      from { transform: scale(1.4); opacity: 0.9; }
+      to   { transform: scale(0.7); opacity: 0.4; }
     }
     </style>
     <script>
@@ -75,9 +74,9 @@
         const bw = Math.max(document.querySelector('.lingo-banner').offsetWidth, window.innerWidth);
         const bh = 56;
         phrases.forEach((span) => {
-          const maxX = Math.min(bw - 160, window.innerWidth - 170);
+          const maxX = Math.max(20, window.innerWidth - 180);
           const x = Math.random() * maxX + 10;
-          const y = 12 + Math.random() * (bh - 38);
+          const y = 14 + Math.random() * 28;
           const dur = (2.5 + Math.random() * 3.5).toFixed(1);
           const del = (Math.random() * 8).toFixed(1);
           span.style.cssText = `
