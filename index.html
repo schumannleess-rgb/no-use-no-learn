@@ -27,8 +27,7 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(180deg, rgba(91,106,240,1) 0%, rgba(91,106,240,0.85) 20%, rgba(91,106,240,0.7) 40%, rgba(91,106,240,0.55) 60%, rgba(91,106,240,0.4) 100%);
-      background-attachment: fixed;
+      background: rgba(70,85,200,1);
       color: white;
       min-height: 100vh;
       padding-bottom: 100px;
@@ -43,8 +42,8 @@
       right: 0;
       z-index: 100;
       pointer-events: none;
-      height: 72px;
-      background: linear-gradient(180deg, rgba(91,106,240,0.95) 0%, rgba(91,106,240,0.7) 100%);
+      height: 80px;
+      background: linear-gradient(135deg, rgba(60,80,220,0.9) 0%, rgba(91,106,240,0.95) 50%, rgba(120,140,255,0.9) 100%);
       overflow: hidden;
     }
     .lingo-phrases {
@@ -114,7 +113,7 @@
     .section-title {
       font-size: 13px;
       font-weight: 600;
-      color: rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.55);
       text-transform: uppercase;
       letter-spacing: 0.08em;
       padding: 16px 16px 8px;
@@ -132,9 +131,12 @@
     }
 
     .sentence-card {
-      background: var(--card);
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.6);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15), 0 1px 4px rgba(0,0,0,0.08);
       padding: 14px 16px;
       display: flex;
       align-items: center;
@@ -143,6 +145,7 @@
       cursor: pointer;
       position: relative;
       overflow: hidden;
+      color: #1a1a2e;
     }
     .sentence-card.learned {
       opacity: 0;
@@ -156,12 +159,12 @@
       flex: 1;
       font-size: 15px;
       line-height: 1.5;
-      color: var(--text);
+      color: #1a1a2e;
     }
     .sentence-card .scene-tag {
       font-size: 11px;
-      color: var(--primary);
-      background: var(--primary-light);
+      color: #5b6af0;
+      background: rgba(91,106,240,0.1);
       border-radius: 6px;
       padding: 2px 8px;
       white-space: nowrap;
@@ -181,15 +184,15 @@
       flex-shrink: 0;
     }
     .icon-btn.speak {
-      background: var(--primary-light);
-      color: var(--primary);
+      background: rgba(91,106,240,0.1);
+      color: #5b6af0;
     }
-    .icon-btn.speak:active { background: #dde0ff; }
+    .icon-btn.speak:active { background: rgba(91,106,240,0.2); }
     .icon-btn.done {
-      background: var(--success-light);
-      color: var(--success);
+      background: rgba(16,185,129,0.12);
+      color: #10b981;
     }
-    .icon-btn.done:active { background: #a7f3d0; }
+    .icon-btn.done:active { background: rgba(16,185,129,0.2); }
 
     /* ── Calendar ── */
     .calendar-wrap {
