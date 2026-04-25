@@ -42,33 +42,53 @@
       z-index: 100;
       pointer-events: none;
       height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       background: linear-gradient(180deg, rgba(91,106,240,0.95) 0%, rgba(91,106,240,0.7) 100%);
+      overflow: hidden;
     }
     .lingo-phrases {
-      display: flex;
-      align-items: center;
-      gap: 0;
+      position: relative;
+      width: 100%;
+      height: 100%;
     }
     .lingo-phrases span {
       position: absolute;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
-      color: rgba(255,255,255,0.95);
-      text-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      color: rgba(255,255,255,1);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.2);
       white-space: nowrap;
       opacity: 0;
-      transform: scale(0.9);
-      animation: lingoFloat 14s ease-in-out infinite;
-      animation-delay: calc(var(--i) * 1.1s);
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+      animation-direction: alternate;
     }
-    @keyframes lingoFloat {
-      0%,100% { opacity: 0; transform: scale(0.85) translateY(4px); }
-      8%,92% { opacity: 0.9; transform: scale(1) translateY(0); }
-      50% { opacity: 1; transform: scale(1.05) translateY(-3px); }
+    @keyframes lingoBreath {
+      0%   { transform: scale(0.75); opacity: 0; }
+      20%  { opacity: 0.5; }
+      100% { transform: scale(1.3); opacity: 0.15; }
     }
+    </style>
+    <script>
+      // Scatter phrases randomly across the banner
+      const phrases = document.querySelectorAll('.lingo-phrases span');
+      const bannerW = () => document.querySelector('.lingo-banner').offsetWidth;
+      const bannerH = 56;
+      phrases.forEach((span, i) => {
+        // Random position across the area (avoid edges)
+        const x = Math.random() * (bannerW() - 180) + 10;
+        const y = 14 + Math.random() * (bannerH - 36);
+        // Random animation speed and delay
+        const dur = (3 + Math.random() * 3).toFixed(1); // 3-6s
+        const del = (Math.random() * 6).toFixed(1);     // 0-6s stagger
+        span.style.cssText = `
+          left: ${x}px;
+          top: ${y}px;
+          animation-duration: ${dur}s;
+          animation-delay: -${del}s;
+          animation-name: lingoBreath;
+        `;
+      });
+    </script>
 
     /* ── Header ── */
     header {
