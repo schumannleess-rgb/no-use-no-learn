@@ -58,9 +58,6 @@
       text-shadow: 0 1px 4px rgba(0,0,0,0.2);
       white-space: nowrap;
       opacity: 0.9;
-      animation-timing-function: ease-in-out;
-      animation-iteration-count: infinite;
-      animation-direction: alternate;
     }
     @keyframes lingoBreath {
       from { transform: scale(1.4); opacity: 0.9; }
@@ -71,8 +68,6 @@
       // Scatter phrases randomly across the banner
       const phrases = document.querySelectorAll('.lingo-phrases span');
       function scatter() {
-        const bw = Math.max(document.querySelector('.lingo-banner').offsetWidth, window.innerWidth);
-        const bh = 56;
         phrases.forEach((span) => {
           const x = Math.random() * (window.innerWidth - 160);
           const y = 14 + Math.random() * 28;
@@ -80,7 +75,12 @@
           const del = (Math.random() * 8).toFixed(1);
           span.style.left = x + 'px';
           span.style.top  = y + 'px';
-          span.style.animation = 'lingoBreath ' + dur + 's ease-in-out ' + (-del) + 's infinite alternate';
+          span.style.animationDuration = dur + 's';
+          span.style.animationDelay = -del + 's';
+          span.style.animationTimingFunction = 'ease-in-out';
+          span.style.animationIterationCount = 'infinite';
+          span.style.animationDirection = 'alternate';
+          span.style.animationName = 'lingoBreath';
         });
       }
       window.addEventListener('DOMContentLoaded', () => setTimeout(scatter, 50));
