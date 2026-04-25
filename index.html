@@ -74,19 +74,13 @@
         const bw = Math.max(document.querySelector('.lingo-banner').offsetWidth, window.innerWidth);
         const bh = 56;
         phrases.forEach((span) => {
-          const maxX = Math.max(20, window.innerWidth - 180);
-          const x = Math.random() * maxX + 10;
+          const x = Math.random() * (window.innerWidth - 160);
           const y = 14 + Math.random() * 28;
           const dur = (2.5 + Math.random() * 3.5).toFixed(1);
           const del = (Math.random() * 8).toFixed(1);
-          span.style.cssText = `
-            left: ${x}px;
-            top: ${y}px;
-            animation-duration: ${dur}s;
-            animation-delay: -${del}s;
-            animation-name: lingoBreath;
-            animation-fill-mode: both;
-          `;
+          span.style.left = x + 'px';
+          span.style.top  = y + 'px';
+          span.style.animation = 'lingoBreath ' + dur + 's ease-in-out ' + (-del) + 's infinite alternate';
         });
       }
       window.addEventListener('DOMContentLoaded', () => setTimeout(scatter, 50));
