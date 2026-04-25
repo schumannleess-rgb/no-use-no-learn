@@ -33,11 +33,48 @@
       overflow-x: hidden;
     }
 
+    /* ── Lingo Banner ── */
+    .lingo-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      pointer-events: none;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, rgba(91,106,240,0.95) 0%, rgba(91,106,240,0.7) 100%);
+    }
+    .lingo-phrases {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .lingo-phrases span {
+      position: absolute;
+      font-size: 20px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.95);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      white-space: nowrap;
+      opacity: 0;
+      transform: scale(0.9);
+      animation: lingoFloat 14s ease-in-out infinite;
+      animation-delay: calc(var(--i) * 1.1s);
+    }
+    @keyframes lingoFloat {
+      0%,100% { opacity: 0; transform: scale(0.85) translateY(4px); }
+      8%,92% { opacity: 0.9; transform: scale(1) translateY(0); }
+      50% { opacity: 1; transform: scale(1.05) translateY(-3px); }
+    }
+
     /* ── Header ── */
     header {
       background: var(--primary);
       color: white;
-      padding: 20px 20px 16px;
+      padding: 76px 20px 16px;
       border-radius: 0 0 24px 24px;
     }
     .lang-badge {
@@ -384,6 +421,24 @@
   </style>
 </head>
 <body>
+
+  <!-- ══ Lingo Banner ══ -->
+  <div class="lingo-banner">
+    <div class="lingo-phrases" id="lingo-phrases">
+      <span style="--i:0">不用不学</span>
+      <span style="--i:1">No use, No learn</span>
+      <span style="--i:2">Pas d'utilisation, pas d'apprentissage</span>
+      <span style="--i:3">唔用就唔學</span>
+      <span style="--i:4">勿用就勿學</span>
+      <span style="--i:5">勿用就勿学</span>
+      <span style="--i:6">不消就不学</span>
+      <span style="--i:7">不复盘就不学</span>
+      <span style="--i:8">Không dùng, không học</span>
+      <span style="--i:9">ไม่ใช้ไม่เรียน</span>
+      <span style="--i:10">使わなければ学ばない</span>
+      <span style="--i:11">사용하지 않으면 배우지 않는다</span>
+    </div>
+  </div>
 
   <header>
     <div class="lang-badge">🇬🇧 英语</div>
