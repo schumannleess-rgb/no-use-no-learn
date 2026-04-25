@@ -21,9 +21,9 @@
       --danger: #ef4444;
       --radius: 16px;
       --shadow: 0 2px 12px rgba(0,0,0,0.1);
-      --scene-report: #5b6af0;
-      --scene-chat: #10b981;
-      --scene-meeting: #8b5cf6;
+      --scene-report: #e8a838;
+      --scene-chat: #38c8b0;
+      --scene-meeting: #c0576a;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -114,9 +114,9 @@
       font-size: 8px;
       margin-right: 1px;
     }
-    .scene-dot.report   { color: #5b6af0; }
-    .scene-dot.chat     { color: #10b981; }
-    .scene-dot.meeting  { color: #8b5cf6; }
+    .scene-dot.report   { color: #e8a838; }
+    .scene-dot.chat     { color: #38c8b0; }
+    .scene-dot.meeting  { color: #c0576a; }
     .scene-dot + span:last-child { margin-left: 8px; }
 
     /* ── Sentences ── */
@@ -164,9 +164,9 @@
       margin: 0;
       pointer-events: none;
     }
-    .sentence-card.report { border: 2px solid rgba(91,106,240,0.35); }
-    .sentence-card.chat   { border: 2px solid rgba(16,185,129,0.35); }
-    .sentence-card.meeting { border: 2px solid rgba(139,92,246,0.35); }
+    .sentence-card.report   { border: 2px solid rgba(232,168,56,0.65); }
+    .sentence-card.chat    { border: 2px solid rgba(56,200,176,0.65); }
+    .sentence-card.meeting { border: 2px solid rgba(192,87,106,0.65); }
     .sentence-card .en-text {
       flex: 1;
       font-size: 15px;
@@ -187,15 +187,15 @@
       flex-shrink: 0;
     }
     .icon-btn.speak {
-      background: rgba(91,106,240,0.1);
-      color: #5b6af0;
+      background: rgba(232,168,56,0.12);
+      color: #e8a838;
     }
-    .icon-btn.speak:active { background: rgba(91,106,240,0.2); }
+    .icon-btn.speak:active { background: rgba(232,168,56,0.22); }
     .icon-btn.done {
-      background: rgba(16,185,129,0.12);
-      color: #10b981;
+      background: rgba(56,200,176,0.12);
+      color: #38c8b0;
     }
-    .icon-btn.done:active { background: rgba(16,185,129,0.2); }
+    .icon-btn.done:active { background: rgba(56,200,176,0.22); }
 
     /* ── Calendar ── */
     .calendar-wrap {
@@ -466,7 +466,9 @@
     <div class="lang-badge">🇬🇧 英语</div>
     <div class="subtitle">
       <span class="scene-dot report">●</span>汇报
+      &nbsp;&nbsp;
       <span class="scene-dot chat">●</span>闲聊
+      &nbsp;&nbsp;
       <span class="scene-dot meeting">●</span>会议
     </div>
   </header>
