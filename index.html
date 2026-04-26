@@ -639,6 +639,46 @@
 
   <div id="toast"></div>
 
+  <!-- ── API Key Setup (always visible) ── -->
+  <div id="keysetup" style="
+    position: fixed;
+    bottom: 90px;
+    left: 16px;
+    right: 16px;
+    background: rgba(30,30,50,0.95);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px;
+    padding: 16px;
+    z-index: 300;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  ">
+    <div style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 8px;">🔑 MiniMax API Key</div>
+    <div style="display: flex; gap: 8px;">
+      <input id="key-input" type="password" placeholder="sk-cp-..." style="
+        flex: 1;
+        padding: 10px 14px;
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 10px;
+        background: rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.9);
+        font-size: 14px;
+        outline: none;
+      ">
+      <button id="key-save-btn" style="
+        padding: 10px 16px;
+        background: rgba(91,106,240,0.7);
+        border: 1px solid rgba(91,106,240,0.5);
+        border-radius: 10px;
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+      ">Save</button>
+    </div>
+  </div>
+
   <script>
     // ── Data ──────────────────────────────────────────────
     const INITIAL_SENTENCES = [
@@ -1050,15 +1090,28 @@
       }
     }
 
-    function promptForKey() {
-      const saved = getAPIKey();
-      if (saved) return saved;
-      const key = prompt('🔑 Paste your MiniMax API key:\n\n(Get it at platform.minimaxi.com)\n\nYour key is stored only in your browser.');
-      if (key && key.trim()) {
-        saveAPIKey(key.trim());
-      }
-      return key ? key.trim() : null;
+    function hideKeySetup() {
+      const el = document.getElementById('keysetup');
+      if (el) el.style.display = 'none';
     }
+
+    function showKeySetup() {
+      const el = document.getElementById('keysetup');
+      if (el) el.style.display = 'block';
+    }
+
+    // Init key setup UI
+    document.getElementById('key-save-btn').onclick = () => {
+      const key = document.getElementById('key-input').value.trim();
+      if (!key) return;
+      saveAPIKey(key);
+      hideKeySetup();
+      showToast('API key saved!');
+    };
+
+    document.getElementById('key-input').onkeydown = (e) => {
+      if (e.key === 'Enter') document.getElementById('key-save-btn').click();
+    };
 
     // ── Chat ──────────────────────────────────────────────
     const chatBtn = document.getElementById('chat-btn');
@@ -1071,8 +1124,9 @@
     chatBtn.onclick = () => {
       const key = getAPIKey();
       if (!key) {
-        const newKey = promptForKey();
-        if (!newKey) return;
+        showKeySetup();
+        document.getElementById('key-input').focus();
+        return;
       }
       chatPanel.classList.add('open');
     };
@@ -1081,8 +1135,9 @@
     async function sendToAI(userText) {
       let apiKey = getAPIKey();
       if (!apiKey) {
-        apiKey = promptForKey();
-        if (!apiKey) return "Please add your API key first 😊";
+        showKeySetup();
+        document.getElementById('key-input').focus();
+        return "Please add your API key first 😊";
       }
 
       const active = state.sentences.filter(s => !s.learned);
@@ -1152,7 +1207,9 @@ Roleplay naturally as a native English-speaking colleague or manager. Respond to
     }
 
     // ── Init ──────────────────────────────────────────────
-    // Try to load key silently; chat button will prompt if missing
+    if (getAPIKey()) {
+      hideKeySetup();
+    }
     try { renderSentences(); } catch (e) {}
     try { renderCalendar(); } catch (e) {}
   </script>
