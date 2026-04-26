@@ -151,11 +151,13 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      transition: transform 0.15s, opacity 0.3s;
-      cursor: pointer;
+      transition: transform 0.15s, opacity 0.3s, border-radius 0.4s;
+      cursor: grab;
       position: relative;
-      overflow: hidden;
+      overflow: visible;
       color: #1a1a2e;
+      touch-action: pan-y;
+      user-select: none;
     }
     .sentence-card.learned {
       opacity: 0;
@@ -164,6 +166,18 @@
       padding: 0;
       margin: 0;
       pointer-events: none;
+    }
+    .sentence-card.sliding {
+      cursor: grabbing;
+      transition: none;
+    }
+    .sentence-card.animating {
+      position: fixed;
+      z-index: 998;
+      pointer-events: none;
+    }
+    .sentence-card.shrinking {
+      overflow: visible;
     }
     .sentence-card.report   {
       border: 2px solid rgba(232,168,56,0.7);
@@ -611,25 +625,94 @@
 
     // ── Mark Learned ─────────────────────────────────────
     function markLearned(id) {
-      const sentence = state.sentences.find(s => s.id === id);
-      if (!sentence) return;
+      triggerLearnAnimation(id);
+    }
 
-      sentence.learned = true;
-      state.learned.push(id);
+    function triggerLearnAnimation(id) {
+      const card = document.querySelector(`.sentence-card[data-id="${id}"]`);
+      if (!card || card.classList.contains('animating')) return;
 
-      const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-      if (!state.history[today]) state.history[today] = [];
-      state.history[today].push({ ...sentence, learnedAt: today });
+      const emoji = ['🎉','⭐','🌙','💫','✨'][Math.floor(Math.random() * 5)];
+      const scene = card.dataset.scene;
 
-      saveState();
-      renderSentences();
-      renderCalendar();
+      card.classList.add('animating');
 
-      const card = document.querySelector(`[data-id="${id}"]`);
-      if (card) {
-        card.classList.add('learned');
-      }
-      showToast('✓ 已掌握！');
+      // Step 1: shrink to circle emoji
+      card.style.transition = 'transform 0.5s cubic-bezier(0.4,0,0.2,1), border-radius 0.5s ease-in-out, opacity 0.3s ease-in 0.5s';
+      card.style.transform = 'scale(0.15)';
+      card.style.borderRadius = '50%';
+      card.style.opacity = '0';
+
+      // Step 2: after shrink, show emoji
+      setTimeout(() => {
+        const rect = card.getBoundingClientRect();
+        card.innerHTML = `<div class="learned-emoji" style="
+          position:fixed;
+          left:${rect.left + rect.width/2 - 24}px;
+          top:${rect.top + rect.height/2 - 24}px;
+          width:48px;height:48px;
+          font-size:28px;
+          line-height:48px;
+          text-align:center;
+          z-index:999;
+        ">${emoji}</div>`;
+        card.style.opacity = '0';
+        card.style.transition = '';
+        card.style.transform = '';
+        card.style.borderRadius = '';
+
+        // Step 3: splash particles
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        for (let i = 0; i < 8; i++) {
+          const angle = (i / 8) * Math.PI * 2;
+          const dist = 40 + Math.random() * 30;
+          const p = document.createElement('div');
+          p.textContent = emoji;
+          p.style.cssText = `
+            position:fixed;
+            left:${cx - 12}px;
+            top:${cy - 12}px;
+            font-size:${12 + Math.random() * 10}px;
+            z-index:999;
+            pointer-events:none;
+            transition: all 0.6s cubic-bezier(0.2,0.8,0.4,1);
+            opacity: 1;
+          `;
+          document.body.appendChild(p);
+          requestAnimationFrame(() => {
+            p.style.left = (cx + Math.cos(angle) * dist - 12) + 'px';
+            p.style.top  = (cy + Math.sin(angle) * dist - 12) + 'px';
+            p.style.opacity = '0';
+            p.style.transform = 'scale(0.3)';
+          });
+          setTimeout(() => p.remove(), 700);
+        }
+
+        // Step 4: fade out emoji after delay
+        const emojiEl = card.querySelector('.learned-emoji');
+        setTimeout(() => {
+          if (emojiEl) {
+            emojiEl.style.transition = 'opacity 0.3s';
+            emojiEl.style.opacity = '0';
+          }
+        }, 400);
+        setTimeout(() => {
+          if (emojiEl) emojiEl.remove();
+          // Actually mark as learned in state
+          const sentence = state.sentences.find(s => s.id === id);
+          if (!sentence) return;
+          sentence.learned = true;
+          if (!state.learned.includes(id)) state.learned.push(id);
+          const today = new Date().toISOString().slice(0, 10);
+          if (!state.history[today]) state.history[today] = [];
+          state.history[today].push({ ...sentence, learnedAt: today });
+          saveState();
+          renderSentences();
+          renderCalendar();
+          showToast('✓ 已掌握！');
+        }, 750);
+      }, 500);
     }
 
     // ── Refill ────────────────────────────────────────────
