@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Lingo — 外语学习器</title>
+  <title>Lingo — Language Learning</title>
   <style>
     :root {
       --bg: transparent;
@@ -506,11 +506,11 @@
   </div>
 
   <header>
-    <div class="lang-badge">🇬🇧 英语</div>
+    <div class="lang-badge">🇬🇧 English</div>
     <div class="subtitle">
-      <span class="scene-tag-pill report">● 汇报</span>
-      <span class="scene-tag-pill chat">● 闲聊</span>
-      <span class="scene-tag-pill meeting">● 会议</span>
+      <span class="scene-tag-pill report">● Report</span>
+      <span class="scene-tag-pill chat">● Chat</span>
+      <span class="scene-tag-pill meeting">● Meeting</span>
     </div>
   </header>
 
@@ -527,7 +527,7 @@
     </div>
     <div class="calendar-grid">
       <div class="weekdays">
-        <div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div>
+        <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
       </div>
       <div class="days-grid" id="days-grid"></div>
     </div>
@@ -542,13 +542,13 @@
 
   <div id="chat-panel">
     <div class="chat-header">
-      <span>AI 对话练习</span>
+      <span>AI Chat Practice</span>
       <button class="close-chat" id="close-chat">✕</button>
     </div>
     <div id="chat-messages">
       <div class="msg ai">
-        <div class="sender">AI 教练</div>
-        Hi! Let's practice some English. I'll act as your colleague or manager — try responding naturally in English. What would you say in this situation?
+        <div class="sender">AI Coach</div>
+        Hi! Let's practice some English. I'll act as your colleague or manager — try responding naturally in English.
       </div>
     </div>
     <div id="chat-input-row">
@@ -562,18 +562,18 @@
   <script>
     // ── Data ──────────────────────────────────────────────
     const INITIAL_SENTENCES = [
-      { id: 1, en: "I'd flag that the numbers are trending in the right direction — but I want to flag a couple of caveats.", scene: "汇报" },
-      { id: 2, en: "To put it in perspective, we outperform the industry average by roughly 20%.", scene: "汇报" },
-      { id: 3, en: "Based on what I'm seeing, I'd push back on moving forward at this pace.", scene: "汇报" },
-      { id: 4, en: "I'm on the fence about the new tooling, but I'll give it a shot and circle back.", scene: "闲聊" },
-      { id: 5, en: "The roadmap's still up in the air — I wouldn't count on it being finalized just yet.", scene: "闲聊" },
-      { id: 6, en: "To build on what [Name] just said — the underlying assumption is that churn stabilizes by Q3.", scene: "会议" },
-      { id: 7, en: "Just to make sure I'm following — are you saying we'd pause the rollout entirely?", scene: "会议" },
-      { id: 8, en: "I'm not convinced the marginal gain justifies the added complexity, but I'm open to being persuaded.", scene: "会议" },
-      { id: 9, en: "I'd lean toward shipping a simpler version first and iterating based on feedback.", scene: "会议" },
+      { id: 1, en: "I'd flag that the numbers are trending in the right direction — but I want to flag a couple of caveats.", scene: "Report" },
+      { id: 2, en: "To put it in perspective, we outperform the industry average by roughly 20%.", scene: "Report" },
+      { id: 3, en: "Based on what I'm seeing, I'd push back on moving forward at this pace.", scene: "Report" },
+      { id: 4, en: "I'm on the fence about the new tooling, but I'll give it a shot and circle back.", scene: "Chat" },
+      { id: 5, en: "The roadmap's still up in the air — I wouldn't count on it being finalized just yet.", scene: "Chat" },
+      { id: 6, en: "To build on what [Name] just said — the underlying assumption is that churn stabilizes by Q3.", scene: "Meeting" },
+      { id: 7, en: "Just to make sure I'm following — are you saying we'd pause the rollout entirely?", scene: "Meeting" },
+      { id: 8, en: "I'm not convinced the marginal gain justifies the added complexity, but I'm open to being persuaded.", scene: "Meeting" },
+      { id: 9, en: "I'd lean toward shipping a simpler version first and iterating based on feedback.", scene: "Meeting" },
     ];
 
-    const SCENES = ["汇报", "闲聊", "会议"];
+    const SCENES = ["Report", "Chat", "Meeting"];
 
     let state = loadState();
 
@@ -632,7 +632,7 @@
       }
 
       container.innerHTML = active.map(s => `
-        <div class="sentence-card ${s.scene === '汇报' ? 'report' : s.scene === '闲聊' ? 'chat' : 'meeting'}" data-id="${s.id}" data-scene="${s.scene}">
+        <div class="sentence-card ${s.scene === 'Report' ? 'report' : s.scene === 'Chat' ? 'chat' : 'meeting'}" data-id="${s.id}" data-scene="${s.scene}">
           <div class="en-text">${s.en}</div>
           <button class="icon-btn speak" onclick="speak('${s.id}')" title="Pronounce">🔊</button>
           <button class="icon-btn done" onclick="markLearned(${s.id})" title="Learned">✓</button>
@@ -740,9 +740,9 @@
     function renderCalendar() {
       const year = state.currentYear;
       const month = state.currentMonth;
-      const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+      const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-      document.getElementById('month-label').textContent = `${year}年 ${monthNames[month]}`;
+      document.getElementById('month-label').textContent = `${monthNames[month]} ${year}`;
 
       const firstDay = new Date(year, month, 1);
       // Monday-first (1=Mon ... 7=Sun), adjust Sunday to 7
@@ -788,7 +788,7 @@
 
       if (!history || history.length === 0) {
         title.textContent = `${dateStr} — no practice yet`;
-        list.innerHTML = '<div style="color:#6b7280;font-size:14px;text-align:center;padding:10px 0;">暂无记录</div>';
+        list.innerHTML = '<div style="color:#6b7280;font-size:14px;text-align:center;padding:10px 0;">No records yet</div>';
         panel.classList.add('visible');
         return;
       }
@@ -838,7 +838,7 @@
       const active = state.sentences.filter(s => !s.learned);
       const activeEn = active.map(s => s.en).join('\n');
 
-      const systemPrompt = `You are an AI English conversation coach. The user is practicing English for workplace communication (汇报, 闲聊, 会议).
+      const systemPrompt = `You are an AI English conversation coach. The user is practicing English for workplace communication (Report, Chat, Meeting).
 
 Current active sentences to practice from:
 ${activeEn}
@@ -873,8 +873,8 @@ Roleplay naturally as a native English-speaking colleague or manager. Respond to
     function addMessage(text, who) {
       const div = document.createElement('div');
       div.className = `msg ${who}`;
-      if (who === 'ai') div.innerHTML = `<div class="sender">AI 教练</div>${text}`;
-      else div.innerHTML = `<div class="sender">你</div>${text}`;
+      if (who === 'ai') div.innerHTML = `<div class="sender">AI Coach</div>${text}`;
+      else div.innerHTML = `<div class="sender">You</div>${text}`;
       chatMessages.appendChild(div);
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
