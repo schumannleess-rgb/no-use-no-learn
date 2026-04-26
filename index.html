@@ -514,11 +514,11 @@
     </div>
   </header>
 
-  <div class="section-title">句子库 · <span id="count">9</span> 句</div>
+  <div class="section-title">Sentence Library · <span id="count">9</span> sentences</div>
 
   <div id="sentence-list"></div>
 
-  <div class="section-title" style="margin-top:8px;">📅 学习日历</div>
+  <div class="section-title" style="margin-top:8px;">📅 Learning Journal</div>
   <div class="calendar-wrap">
     <div class="calendar-nav">
       <button id="prev-month">‹</button>
@@ -552,7 +552,7 @@
       </div>
     </div>
     <div id="chat-input-row">
-      <input id="chat-input" placeholder="用英语打字练习..." autocomplete="off">
+      <input id="chat-input" placeholder="Type in English to practice..." autocomplete="off">
       <button id="chat-send">➤</button>
     </div>
   </div>
@@ -624,8 +624,8 @@
         container.innerHTML = `
           <div class="empty-card">
             <div class="emoji">🎉</div>
-            <p>太棒了！所有句子都已掌握！</p>
-            <button class="add-btn" onclick="refillSentences()">+ 补充新句子</button>
+            <p>All done! Every sentence mastered!</p>
+            <button class="add-btn" onclick="refillSentences()">+ Add more sentences</button>
           </div>
         `;
         return;
@@ -634,8 +634,8 @@
       container.innerHTML = active.map(s => `
         <div class="sentence-card ${s.scene === '汇报' ? 'report' : s.scene === '闲聊' ? 'chat' : 'meeting'}" data-id="${s.id}" data-scene="${s.scene}">
           <div class="en-text">${s.en}</div>
-          <button class="icon-btn speak" onclick="speak('${s.id}')" title="发音">🔊</button>
-          <button class="icon-btn done" onclick="markLearned(${s.id})" title="学会了">✓</button>
+          <button class="icon-btn speak" onclick="speak('${s.id}')" title="Pronounce">🔊</button>
+          <button class="icon-btn done" onclick="markLearned(${s.id})" title="Learned">✓</button>
         </div>
       `).join('');
     }
@@ -718,21 +718,21 @@
           saveState();
           renderSentences();
           renderCalendar();
-          showToast('✓ 已掌握！');
+          showToast('✓ Learned!');
         }, 700);
       }, 520);
     }
 
     // ── Refill ────────────────────────────────────────────
     function refillSentences() {
-      showToast('请在对话里告诉我想补充什么场景 😊');
+      showToast('Type in the chat to suggest new scenes 😊');
     }
 
     // ── TTS ───────────────────────────────────────────────
     function speak(id) {
       const audio = new Audio('./audio/sentence_' + id + '.mp3');
       audio.play().catch(e => {
-        showToast('发音加载失败，请检查网络');
+        showToast('Audio failed to load. Check your connection.');
       });
     }
 
@@ -787,13 +787,13 @@
       const title = document.getElementById('day-panel-title');
 
       if (!history || history.length === 0) {
-        title.textContent = `${dateStr} — 今日未练习`;
+        title.textContent = `${dateStr} — no practice yet`;
         list.innerHTML = '<div style="color:#6b7280;font-size:14px;text-align:center;padding:10px 0;">暂无记录</div>';
         panel.classList.add('visible');
         return;
       }
 
-      title.textContent = `${dateStr} — 学会了 ${history.length} 句`;
+      title.textContent = `${dateStr} — ${history.length} sentences learned`;
       list.innerHTML = history.map(s => `
         <div class="history-item">
           <div class="history-scene">${s.scene}</div>
