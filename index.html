@@ -661,6 +661,7 @@
             <div class="emoji">🎉</div>
             <p>All done! Every sentence mastered!</p>
             <button class="add-btn" onclick="refillSentences()">+ Add more sentences</button>
+            <button class="add-btn" onclick="resetProgress()" style="margin-top:8px;background:rgba(255,255,255,0.15)">🔄 Reset & Practice Again</button>
           </div>
         `;
         return;
@@ -795,6 +796,12 @@
     // ── Refill ────────────────────────────────────────────
     function refillSentences() {
       showToast('Type in the chat to suggest new scenes 😊');
+    }
+
+    function resetProgress() {
+      if (!confirm('Reset all progress and start over?')) return;
+      localStorage.removeItem('lingo-state');
+      location.reload();
     }
 
     // ── TTS ───────────────────────────────────────────────
