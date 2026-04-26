@@ -408,15 +408,15 @@
     #apikey-modal {
       display: none;
       position: fixed;
-      inset: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       z-index: 9999;
       align-items: center;
       justify-content: center;
     }
-    #apikey-modal.show { display: flex; }
+    #apikey-modal.show { display: -webkit-flex; display: flex; }
     .modal-backdrop {
       position: absolute;
-      inset: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.6);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
@@ -1227,6 +1227,9 @@ Roleplay naturally as a native English-speaking colleague or manager. Respond to
     }
 
     // ── Init ──────────────────────────────────────────────
+    if (!getAPIKey()) {
+      showKeyModal();
+    }
     renderSentences();
     renderCalendar();
   </script>
