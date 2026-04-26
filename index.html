@@ -734,7 +734,7 @@
       card.classList.add('animating');
 
       // Fade card out quickly as stars spawn
-      card.style.transition = 'opacity 0.2s ease-out';
+      card.style.transition = 'opacity 0.4s ease-out';
       card.style.opacity = '0';
 
       const cx = rect.left + rect.width / 2;
@@ -763,17 +763,17 @@
         // Calculate drift direction — outward from center with randomness
         const dx = (px - cx) * 0.3 + (Math.random() - 0.5) * 60;
         const dy = (py - cy) * 0.3 - 20 - Math.random() * 40; // slight upward bias
-        const driftDist = 60 + Math.random() * 100;
+        const driftDist = 120 + Math.random() * 150;
 
         requestAnimationFrame(() => {
-          star.style.transition = `all ${0.9 + Math.random() * 0.6}s cubic-bezier(0.15, 0.8, 0.25, 1)`;
+          star.style.transition = `all ${2.0 + Math.random() * 1.5}s cubic-bezier(0.1, 0.8, 0.25, 1)`;
           star.style.left = (px + dx * (driftDist / 80)) + 'px';
           star.style.top = (py + dy * (driftDist / 80)) + 'px';
           star.style.opacity = '0';
           star.style.transform = `scale(${0.2 + Math.random() * 0.3}) rotate(${Math.random() * 360}deg)`;
         });
 
-        setTimeout(() => star.remove(), 1600);
+        setTimeout(() => star.remove(), 3500);
       }
 
       // Complete animation
