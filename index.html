@@ -653,9 +653,9 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   ">
-    <div style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 8px;">🔑 BigModel API Key (GLM 免费模型)</div>
+    <div style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 8px;">🔑 GLM Key（已预置，直接点 Save 即可）</div>
     <div style="display: flex; gap: 8px;">
-      <input id="key-input" type="password" placeholder="GLM API Key..." autocomplete="off" style="
+      <input id="key-input" type="password" value="7da4b1460ca14cfea7872f01e3115a75.NNqzuQIw9Q68i73I" autocomplete="off" style="
         flex: 1;
         padding: 10px 14px;
         border: 1px solid rgba(255,255,255,0.2);
@@ -1073,13 +1073,15 @@
     closeChat.onclick = () => chatPanel.classList.remove('open');
 
     // ── API Key Setup ─────────────────────────────────────
-    const KEY_STORAGE = 'minimax_key';
+    const KEY_STORAGE = 'glm_key';
+    const DEFAULT_KEY = '7da4b1460ca14cfea7872f01e3115a75.NNqzuQIw9Q68i73I';
 
     function getAPIKey() {
       try {
-        return localStorage.getItem(KEY_STORAGE);
+        const stored = localStorage.getItem(KEY_STORAGE);
+        return stored || DEFAULT_KEY;
       } catch (e) {
-        return null;
+        return DEFAULT_KEY;
       }
     }
 
@@ -1218,8 +1220,10 @@ Roleplay naturally as a native English-speaking colleague or manager. Respond to
     }
 
     // ── Init ──────────────────────────────────────────────
+    // Auto-save the pre-filled key on load
     if (getAPIKey()) {
-      hideKeySetup();
+      try { saveAPIKey(getAPIKey()); } catch(e) {}
+      setTimeout(hideKeySetup, 100);
     }
     try { renderSentences(); } catch (e) {}
     try { renderCalendar(); } catch (e) {}
