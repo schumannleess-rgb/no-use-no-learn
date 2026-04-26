@@ -265,6 +265,16 @@
     .sentence-card .card-check:hover { transform: scale(1.15); }
     .sentence-card .card-check:active { transform: scale(0.95); }
 
+    /* ── Star particle ── */
+    .star-particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     /* ── Calendar ── */
     .calendar-wrap {
       padding: 16px;
@@ -670,82 +680,116 @@
       triggerLearnAnimation(id);
     }
 
+    // Scene color palettes — deep to light gradients
+    const SCENE_COLORS = {
+      Report:   ['#b8721a', '#d49a28', '#e8b84a', '#f0c870', '#f8dda0', '#fae8c0'],
+      Chat:     ['#1a8a7a', '#28b8a0', '#50c8b8', '#80d8cc', '#b0e8de', '#d0f5ed'],
+      Meeting:  ['#90405a', '#a85070', '#c07088', '#d898a8', '#ecb8c4', '#f8d4dc']
+    };
+
+    function createStarParticle(x, y, size, color) {
+      const el = document.createElement('div');
+      el.className = 'star-particle';
+      el.style.left = (x - size / 2) + 'px';
+      el.style.top = (y - size / 2) + 'px';
+      el.style.width = size + 'px';
+      el.style.height = size + 'px';
+      el.style.opacity = '1';
+
+      // Alternate between ★ and dot shapes
+      const isStar = Math.random() > 0.4;
+      if (isStar) {
+        el.innerHTML = '★';
+        el.style.color = color;
+        el.style.fontSize = (size * 0.9) + 'px';
+        el.style.lineHeight = '1';
+        el.style.textShadow = `0 0 ${size * 0.3}px ${color}`;
+      } else {
+        el.style.background = color;
+        el.style.borderRadius = '50%';
+        el.style.boxShadow = `0 0 ${size * 0.5}px ${color}`;
+      }
+
+      document.body.appendChild(el);
+      return el;
+    }
+
     function triggerLearnAnimation(id) {
       const card = document.querySelector(`.sentence-card[data-id="${id}"]`);
       if (!card || card.classList.contains('animating')) return;
 
-      const emoji = ['🎉','⭐','🌙','💫','✨'][Math.floor(Math.random() * 5)];
-
-      // Save position before switching to fixed
+      const scene = card.dataset.scene || 'Report';
+      const colors = SCENE_COLORS[scene] || SCENE_COLORS.Report;
       const rect = card.getBoundingClientRect();
+
+      // Lock card in place for shatter
       card.style.position = 'fixed';
       card.style.left = rect.left + 'px';
       card.style.top = rect.top + 'px';
       card.style.width = rect.width + 'px';
       card.style.height = rect.height + 'px';
       card.style.margin = '0';
+      card.style.zIndex = '999';
       card.classList.add('animating');
 
-      // Step 1: shrink to circle
-      requestAnimationFrame(() => {
-        card.style.transition = 'transform 0.5s cubic-bezier(0.4,0,0.2,1), border-radius 0.5s ease-in-out';
-        card.style.transform = 'scale(0.15)';
-        card.style.borderRadius = '50%';
-      });
+      // Fade card out quickly as stars spawn
+      card.style.transition = 'opacity 0.2s ease-out';
+      card.style.opacity = '0';
 
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const numParticles = 28;
+
+      // Generate stars from card area
+      for (let i = 0; i < numParticles; i++) {
+        const t = i / numParticles;
+        // Distribute particles within card bounds with slight outward bias
+        const spreadX = rect.width * 0.8;
+        const spreadY = rect.height * 0.8;
+        const px = rect.left + rect.width * 0.1 + Math.random() * spreadX;
+        const py = rect.top + rect.height * 0.1 + Math.random() * spreadY;
+
+        // Size varies: smaller dots, medium stars, occasional large
+        const sizeRand = Math.random();
+        const size = sizeRand < 0.3 ? 4 + Math.random() * 4       // small dots
+                    : sizeRand < 0.75 ? 8 + Math.random() * 8     // medium
+                    : 14 + Math.random() * 10;                     // large stars
+
+        const color = colors[Math.floor(Math.random() * colors.length)];
+
+        const star = createStarParticle(px, py, size, color);
+
+        // Calculate drift direction — outward from center with randomness
+        const dx = (px - cx) * 0.3 + (Math.random() - 0.5) * 60;
+        const dy = (py - cy) * 0.3 - 20 - Math.random() * 40; // slight upward bias
+        const driftDist = 60 + Math.random() * 100;
+
+        requestAnimationFrame(() => {
+          star.style.transition = `all ${0.9 + Math.random() * 0.6}s cubic-bezier(0.15, 0.8, 0.25, 1)`;
+          star.style.left = (px + dx * (driftDist / 80)) + 'px';
+          star.style.top = (py + dy * (driftDist / 80)) + 'px';
+          star.style.opacity = '0';
+          star.style.transform = `scale(${0.2 + Math.random() * 0.3}) rotate(${Math.random() * 360}deg)`;
+        });
+
+        setTimeout(() => star.remove(), 1600);
+      }
+
+      // Complete animation
       setTimeout(() => {
-        // Replace with emoji dot
-        card.innerHTML = `<div style="
-          width:48px;height:48px;
-          font-size:28px;line-height:48px;text-align:center;
-        ">${emoji}</div>`;
-        card.style.transition = 'none';
-        card.style.transform = 'scale(1)';
-        card.style.borderRadius = '50%';
-
-        // Splash particles
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        for (let i = 0; i < 8; i++) {
-          const angle = (i / 8) * Math.PI * 2;
-          const dist = 50 + Math.random() * 40;
-          const p = document.createElement('div');
-          p.textContent = emoji;
-          p.style.cssText = `
-            position:fixed;left:${cx-10}px;top:${cy-10}px;
-            font-size:${10 + Math.random()*10}px;z-index:9999;
-            pointer-events:none;opacity:1;
-            transition: all 0.55s cubic-bezier(0.15,0.8,0.3,1);
-          `;
-          document.body.appendChild(p);
-          requestAnimationFrame(() => {
-            p.style.left = (cx + Math.cos(angle)*dist - 10) + 'px';
-            p.style.top  = (cy + Math.sin(angle)*dist - 10) + 'px';
-            p.style.opacity = '0';
-            p.style.transform = 'scale(0.2)';
-          });
-          setTimeout(() => p.remove(), 600);
-        }
-
-        setTimeout(() => {
-          card.style.transition = 'opacity 0.25s';
-          card.style.opacity = '0';
-        }, 350);
-        setTimeout(() => {
-          // Mark learned in state
-          const sentence = state.sentences.find(s => s.id === id);
-          if (!sentence) return;
-          sentence.learned = true;
-          if (!state.learned.includes(id)) state.learned.push(id);
-          const today = new Date().toISOString().slice(0,10);
-          if (!state.history[today]) state.history[today] = [];
-          state.history[today].push({ ...sentence, learnedAt: today });
-          saveState();
-          renderSentences();
-          renderCalendar();
-          showToast('✓ Learned!');
-        }, 700);
-      }, 520);
+        card.remove();
+        const sentence = state.sentences.find(s => s.id === id);
+        if (!sentence) return;
+        sentence.learned = true;
+        if (!state.learned.includes(id)) state.learned.push(id);
+        const today = new Date().toISOString().slice(0,10);
+        if (!state.history[today]) state.history[today] = [];
+        state.history[today].push({ ...sentence, learnedAt: today });
+        saveState();
+        renderSentences();
+        renderCalendar();
+        showToast('✓ Learned!');
+      }, 600);
     }
 
     // ── Refill ────────────────────────────────────────────
