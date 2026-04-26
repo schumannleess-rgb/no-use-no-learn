@@ -286,8 +286,8 @@
       margin-bottom: 12px;
     }
     .calendar-nav button {
-      background: var(--card);
-      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
       border-radius: 10px;
       width: 36px;
       height: 36px;
@@ -296,14 +296,20 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      color: rgba(255,255,255,0.8);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .calendar-nav button:hover {
+      background: rgba(255,255,255,0.2);
     }
     .calendar-nav .month-label {
       font-size: 15px;
       font-weight: 600;
     }
     #toggle-calendar {
-      background: var(--card);
-      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
       border-radius: 10px;
       width: 36px;
       height: 36px;
@@ -314,22 +320,30 @@
       justify-content: center;
       color: rgba(255,255,255,0.7);
       margin-left: 8px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
     }
-    #toggle-calendar:hover { opacity: 0.8; }
+    #toggle-calendar:hover {
+      background: rgba(255,255,255,0.2);
+    }
     .calendar-grid {
-      background: var(--card);
+      background: rgba(255,255,255,0.1);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
       overflow: hidden;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
     .weekdays {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      background: var(--primary);
-      color: white;
+      background: rgba(91,106,240,0.25);
+      color: rgba(255,255,255,0.7);
       font-size: 11px;
       font-weight: 600;
       text-align: center;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
     }
     .weekdays div { padding: 8px 0; }
     .days-grid {
@@ -345,7 +359,7 @@
       cursor: pointer;
       position: relative;
       border-radius: 50%;
-      transition: background 0.15s;
+      transition: background 0.15s, backdrop-filter 0.15s;
     }
     .day-cell.empty { pointer-events: none; }
     .day-cell.has-data::after {
@@ -354,37 +368,39 @@
       bottom: 4px;
       left: 50%;
       transform: translateX(-50%);
-      width: 6px;
-      height: 6px;
+      width: 5px;
+      height: 5px;
       border-radius: 50%;
-      background: var(--primary);
+      background: rgba(91,106,240,0.7);
     }
-    .day-cell.has-data { color: var(--primary); font-weight: 600; }
-    .day-cell.today { background: var(--primary-light); }
-    .day-cell.selected { background: var(--primary); color: white; }
+    .day-cell.has-data { color: rgba(91,106,240,0.9); font-weight: 600; }
+    .day-cell.today { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); }
+    .day-cell.selected { background: rgba(91,106,240,0.5); color: white; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
     .day-cell:active { opacity: 0.7; }
 
     /* ── Day Detail Panel ── */
     #day-panel {
-      background: var(--card);
+      background: rgba(255,255,255,0.1);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
       margin: 10px 16px 0;
       padding: 14px 16px;
       display: none;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
     #day-panel.visible { display: block; }
-    #day-panel h3 { font-size: 14px; margin-bottom: 10px; color: var(--text-secondary); }
+    #day-panel h3 { font-size: 14px; margin-bottom: 10px; color: rgba(255,255,255,0.65); }
     #day-panel .history-item {
       padding: 8px 0;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
       font-size: 14px;
       line-height: 1.4;
     }
     #day-panel .history-item:last-child { border-bottom: none; }
     #day-panel .history-scene {
       font-size: 11px;
-      color: var(--primary);
+      color: rgba(91,106,240,0.85);
       margin-bottom: 2px;
     }
 
@@ -396,18 +412,21 @@
       width: 56px;
       height: 56px;
       border-radius: 50%;
-      background: var(--primary);
-      border: none;
+      background: rgba(91,106,240,0.4);
+      border: 1.5px solid rgba(91,106,240,0.6);
       color: white;
       font-size: 24px;
       cursor: pointer;
-      box-shadow: 0 4px 20px rgba(91,106,240,0.4);
+      box-shadow: 0 4px 20px rgba(91,106,240,0.25);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       z-index: 100;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.15s;
+      transition: transform 0.15s, background 0.15s;
     }
+    #chat-btn:hover { background: rgba(91,106,240,0.55); }
     #chat-btn:active { transform: scale(0.95); }
 
     /* ── Chat Panel ── */
@@ -417,9 +436,11 @@
       left: 0;
       right: 0;
       height: 70vh;
-      background: var(--bg);
+      background: rgba(30,30,50,0.85);
       border-radius: 24px 24px 0 0;
-      box-shadow: 0 -4px 30px rgba(0,0,0,0.12);
+      box-shadow: 0 -4px 30px rgba(0,0,0,0.2);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       z-index: 200;
       display: flex;
       flex-direction: column;
@@ -429,19 +450,21 @@
     #chat-panel.open { transform: translateY(0); }
     #chat-panel .chat-header {
       padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid rgba(255,255,255,0.15);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: var(--primary);
-      color: white;
+      background: rgba(91,106,240,0.3);
+      color: rgba(255,255,255,0.9);
       border-radius: 24px 24px 0 0;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
     #chat-panel .chat-header span { font-size: 16px; font-weight: 600; }
     #chat-panel .close-chat {
-      background: none;
+      background: rgba(255,255,255,0.1);
       border: none;
-      color: white;
+      color: rgba(255,255,255,0.8);
       font-size: 24px;
       cursor: pointer;
       width: 36px;
@@ -460,30 +483,34 @@
       gap: 10px;
     }
     .msg { max-width: 80%; padding: 10px 14px; border-radius: 16px; font-size: 15px; line-height: 1.5; }
-    .msg.ai { background: var(--card); align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: var(--shadow); }
-    .msg.user { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .msg.ai { background: rgba(255,255,255,0.12); align-self: flex-start; border-bottom-left-radius: 4px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+    .msg.user { background: rgba(91,106,240,0.5); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
     .msg .sender { font-size: 11px; opacity: 0.6; margin-bottom: 2px; }
     #chat-input-row {
       padding: 12px 16px;
-      border-top: 1px solid var(--border);
+      border-top: 1px solid rgba(255,255,255,0.1);
       display: flex;
       gap: 8px;
-      background: var(--card);
+      background: rgba(255,255,255,0.05);
     }
     #chat-input {
       flex: 1;
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255,255,255,0.2);
       border-radius: 24px;
       padding: 10px 16px;
       font-size: 15px;
       outline: none;
-      background: var(--bg);
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.9);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
     }
-    #chat-input:focus { border-color: var(--primary); }
+    #chat-input::placeholder { color: rgba(255,255,255,0.4); }
+    #chat-input:focus { border-color: rgba(91,106,240,0.6); }
     #chat-send {
-      background: var(--primary);
+      background: rgba(91,106,240,0.5);
       color: white;
-      border: none;
+      border: 1px solid rgba(91,106,240,0.5);
       border-radius: 50%;
       width: 44px;
       height: 44px;
@@ -492,6 +519,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
     }
 
     /* ── Toast ── */
