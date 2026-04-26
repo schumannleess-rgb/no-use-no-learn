@@ -138,6 +138,35 @@
       color: rgba(192,87,106,0.95);
     }
 
+    /* ── Topic Badge ── */
+    .topic-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 2px 8px;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+    .topic-badge.topic-report   { background: rgba(232,168,56,0.2); border: 1px solid rgba(232,168,56,0.5); color: rgba(232,168,56,0.95); }
+    .topic-badge.topic-chat     { background: rgba(56,200,176,0.2); border: 1px solid rgba(56,200,176,0.5); color: rgba(56,200,176,0.95); }
+    .topic-badge.topic-meeting  { background: rgba(192,87,106,0.2); border: 1px solid rgba(192,87,106,0.5); color: rgba(192,87,106,0.95); }
+    .topic-badge.topic-default  { background: rgba(130,120,200,0.2); border: 1px solid rgba(130,120,200,0.5); color: rgba(180,170,240,0.95); }
+
+    /* ── Topic Filter Tabs ── */
+    #topic-filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    #topic-filters .scene-tag-pill {
+      opacity: 0.5;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    #topic-filters .scene-tag-pill:hover { opacity: 0.75; transform: scale(1.05); }
+    #topic-filters .scene-tag-pill.active { opacity: 1; font-weight: 700; transform: scale(1.08); }
+
     /* ── Sentences ── */
     .section-title {
       font-size: 13px;
@@ -210,12 +239,43 @@
     .sentence-card.shrinking {
       overflow: visible;
     }
-    .sentence-card .en-text {
+    .sentence-card .en-text,
+    .sentence-card .card-text {
       flex: 1;
       font-size: 15px;
       line-height: 1.5;
       color: rgba(255,255,255,0.95);
     }
+    .sentence-card .card-cn {
+      font-size: 12px;
+      color: rgba(255,255,255,0.55);
+      margin-top: 2px;
+    }
+    .sentence-card .card-content {
+      flex: 1;
+      font-size: 14px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.9);
+    }
+
+    /* Knowledge cards — neutral purple tint */
+    .knowledge-card {
+      background: rgba(130,120,200,0.12);
+      border: 2px solid rgba(130,120,200,0.5);
+      box-shadow: 0 0 0 2px rgba(130,120,200,0.08), 0 4px 20px rgba(130,120,200,0.15), 0 1px 4px rgba(0,0,0,0.1);
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .knowledge-card .card-check {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+    }
+    .knowledge-card .topic-badge {
+      align-self: flex-start;
+    }
+
     .sentence-card .icon-btn {
       width: 36px;
       height: 36px;
@@ -599,14 +659,15 @@
 
   <header>
     <div class="lang-badge">🇬🇧 English</div>
-    <div class="subtitle">
-      <span class="scene-tag-pill report">● Report</span>
-      <span class="scene-tag-pill chat">● Chat</span>
-      <span class="scene-tag-pill meeting">● Meeting</span>
+    <div class="subtitle" id="topic-filters">
+      <span class="scene-tag-pill report active" data-topic="All" onclick="filterByTopic('All')">● All</span>
+      <span class="scene-tag-pill report" data-topic="Report" onclick="filterByTopic('Report')">● Report</span>
+      <span class="scene-tag-pill chat" data-topic="Chat" onclick="filterByTopic('Chat')">● Chat</span>
+      <span class="scene-tag-pill meeting" data-topic="Meeting" onclick="filterByTopic('Meeting')">● Meeting</span>
     </div>
   </header>
 
-  <div class="section-title">Sentence Library · <span id="count">9</span> sentences</div>
+  <div class="section-title">Learning Library · <span id="count">9</span> cards</div>
 
   <div id="sentence-list"></div>
 
@@ -655,31 +716,47 @@
   <script>
     // ── Data ──────────────────────────────────────────────
     const INITIAL_SENTENCES = [
-      { id: 1, en: "I'd flag that the numbers are trending in the right direction — but I want to flag a couple of caveats.", scene: "Report" },
-      { id: 2, en: "To put it in perspective, we outperform the industry average by roughly 20%.", scene: "Report" },
-      { id: 3, en: "Based on what I'm seeing, I'd push back on moving forward at this pace.", scene: "Report" },
-      { id: 4, en: "I'm on the fence about the new tooling, but I'll give it a shot and circle back.", scene: "Chat" },
-      { id: 5, en: "The roadmap's still up in the air — I wouldn't count on it being finalized just yet.", scene: "Chat" },
-      { id: 6, en: "To build on what [Name] just said — the underlying assumption is that churn stabilizes by Q3.", scene: "Meeting" },
-      { id: 7, en: "Just to make sure I'm following — are you saying we'd pause the rollout entirely?", scene: "Meeting" },
-      { id: 8, en: "I'm not convinced the marginal gain justifies the added complexity, but I'm open to being persuaded.", scene: "Meeting" },
-      { id: 9, en: "I'd lean toward shipping a simpler version first and iterating based on feedback.", scene: "Meeting" },
+      { id: 1, type: 'language', en: "I'd flag that the numbers are trending in the right direction — but I want to flag a couple of caveats.", cn: '', topic: "Report", learned: false },
+      { id: 2, type: 'language', en: "To put it in perspective, we outperform the industry average by roughly 20%.", cn: '', topic: "Report", learned: false },
+      { id: 3, type: 'language', en: "Based on what I'm seeing, I'd push back on moving forward at this pace.", cn: '', topic: "Report", learned: false },
+      { id: 4, type: 'language', en: "I'm on the fence about the new tooling, but I'll give it a shot and circle back.", cn: '', topic: "Chat", learned: false },
+      { id: 5, type: 'language', en: "The roadmap's still up in the air — I wouldn't count on it being finalized just yet.", cn: '', topic: "Chat", learned: false },
+      { id: 6, type: 'language', en: "To build on what [Name] just said — the underlying assumption is that churn stabilizes by Q3.", cn: '', topic: "Meeting", learned: false },
+      { id: 7, type: 'language', en: "Just to make sure I'm following — are you saying we'd pause the rollout entirely?", cn: '', topic: "Meeting", learned: false },
+      { id: 8, type: 'language', en: "I'm not convinced the marginal gain justifies the added complexity, but I'm open to being persuaded.", cn: '', topic: "Meeting", learned: false },
+      { id: 9, type: 'language', en: "I'd lean toward shipping a simpler version first and iterating based on feedback.", cn: '', topic: "Meeting", learned: false },
     ];
 
-    const SCENES = ["Report", "Chat", "Meeting"];
-
     let state = loadState();
+    state.activeFilter = state.activeFilter || 'All';
 
     function loadState() {
       const saved = localStorage.getItem('lingo-state');
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Rebuild sentence objects from IDs + full list
+        // Rebuild language cards from IDs + full list
         const learnedIds = parsed.learned || [];
+        const languageIds = new Set(INITIAL_SENTENCES.map(s => s.id));
         const sentences = INITIAL_SENTENCES.map(s => ({
           ...s,
           learned: learnedIds.includes(s.id)
         }));
+        // Migrate any existing custom sentences (might have old format)
+        if (parsed.sentences) {
+          for (const s of parsed.sentences) {
+            // Skip if it's one of our initial sentences (already added above)
+            if (languageIds.has(s.id)) continue;
+            // Migrate old format: scene → topic, add type
+            if (!s.type) {
+              s.type = s.type || (s.en ? 'language' : 'knowledge');
+            }
+            if (!s.topic && s.scene) {
+              s.topic = s.scene;
+              delete s.scene;
+            }
+            sentences.push(s);
+          }
+        }
         return {
           sentences,
           learned: parsed.learned || [],
@@ -708,14 +785,23 @@
         currentMonth: state.currentMonth,
         currentYear: state.currentYear,
         calendarExpanded: state.calendarExpanded,
-        weekAnchor: state.weekAnchor
+        weekAnchor: state.weekAnchor,
+        sentences: state.sentences
       }));
+    }
+
+    // Topic → color class mapping
+    function topicColorClass(topic) {
+      const map = {
+        Report: 'topic-report', Chat: 'topic-chat', Meeting: 'topic-meeting'
+      };
+      return map[topic] || 'topic-default';
     }
 
     // ── Render Sentences ──────────────────────────────────
     function renderSentences() {
       const container = document.getElementById('sentence-list');
-      const active = state.sentences.filter(s => !s.learned);
+      const active = state.sentences.filter(s => !s.learned && (state.activeFilter === 'All' || s.topic === state.activeFilter));
 
       document.getElementById('count').textContent = active.length;
 
@@ -723,21 +809,49 @@
         container.innerHTML = `
           <div class="empty-card">
             <div class="emoji">🎉</div>
-            <p>All done! Every sentence mastered!</p>
-            <button class="add-btn" onclick="refillSentences()">+ Add more sentences</button>
+            <p>All done! Every card mastered!</p>
+            <button class="add-btn" onclick="refillSentences()">+ Add more</button>
             <button class="add-btn" onclick="resetProgress()" style="margin-top:8px;background:rgba(255,255,255,0.15)">🔄 Reset & Practice Again</button>
           </div>
         `;
         return;
       }
 
-      container.innerHTML = active.map(s => `
-        <div class="sentence-card ${s.scene === 'Report' ? 'report' : s.scene === 'Chat' ? 'chat' : 'meeting'}" data-id="${s.id}" data-scene="${s.scene}">
-          <div class="card-check" onclick="markLearned(${s.id})" title="Mark as learned">✓</div>
-          <div class="en-text">${s.en}</div>
-          <button class="icon-btn speak" onclick="speak('${s.id}')" title="Pronounce">🔊</button>
-        </div>
-      `).join('');
+      container.innerHTML = active.map(s => {
+        const colorClass = topicColorClass(s.topic);
+        const topicBadge = `<div class="topic-badge ${colorClass}">${s.topic || 'General'}</div>`;
+        const cardClass = s.type === 'knowledge' ? 'knowledge-card' : `sentence-card ${colorClass}`;
+
+        if (s.type === 'knowledge') {
+          return `
+            <div class="${cardClass}" data-id="${s.id}" data-topic="${s.topic}">
+              <div class="card-check" onclick="markLearned(${s.id})" title="Mark as learned">✓</div>
+              ${topicBadge}
+              <div class="card-content">${s.content || s.en}</div>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="${cardClass}" data-id="${s.id}" data-topic="${s.topic}">
+              <div class="card-check" onclick="markLearned(${s.id})" title="Mark as learned">✓</div>
+              ${topicBadge}
+              <div class="card-text">${s.en}</div>
+              ${s.cn ? `<div class="card-cn">${s.cn}</div>` : ''}
+              <button class="icon-btn speak" onclick="speak('${s.id}')" title="Pronounce">🔊</button>
+            </div>
+          `;
+        }
+      }).join('');
+    }
+
+    function filterByTopic(topic) {
+      state.activeFilter = topic;
+      // Update active tab styling
+      document.querySelectorAll('#topic-filters .scene-tag-pill').forEach(el => {
+        el.classList.toggle('active', el.dataset.topic === topic);
+      });
+      saveState();
+      renderSentences();
     }
 
     // ── Mark Learned ─────────────────────────────────────
@@ -749,7 +863,8 @@
     const SCENE_COLORS = {
       Report:   ['#b8721a', '#d49a28', '#e8b84a', '#f0c870', '#f8dda0', '#fae8c0'],
       Chat:     ['#1a8a7a', '#28b8a0', '#50c8b8', '#80d8cc', '#b0e8de', '#d0f5ed'],
-      Meeting:  ['#90405a', '#a85070', '#c07088', '#d898a8', '#ecb8c4', '#f8d4dc']
+      Meeting:  ['#90405a', '#a85070', '#c07088', '#d898a8', '#ecb8c4', '#f8d4dc'],
+      General:  ['#7a5aa0', '#9580c0', '#b0a0d8', '#c8b8e8', '#e0d4f5', '#f0ecfa']
     };
 
     function createStarParticle(x, y, size, color) {
@@ -780,11 +895,11 @@
     }
 
     function triggerLearnAnimation(id) {
-      const card = document.querySelector(`.sentence-card[data-id="${id}"]`);
+      const card = document.querySelector(`[data-id="${id}"]`);
       if (!card || card.classList.contains('animating')) return;
 
-      const scene = card.dataset.scene || 'Report';
-      const colors = SCENE_COLORS[scene] || SCENE_COLORS.Report;
+      const topic = card.dataset.topic || 'General';
+      const colors = SCENE_COLORS[topic] || SCENE_COLORS.General;
       const rect = card.getBoundingClientRect();
 
       // Lock card in place for shatter
@@ -983,11 +1098,11 @@
         return;
       }
 
-      title.textContent = `${dateStr} — ${history.length} sentences learned`;
+      title.textContent = `${dateStr} — ${history.length} cards learned`;
       list.innerHTML = history.map(s => `
         <div class="history-item">
-          <div class="history-scene">${s.scene}</div>
-          <div>${s.en}</div>
+          <div class="history-scene">${s.topic || s.scene || 'General'}</div>
+          <div>${s.en || s.content}</div>
         </div>
       `).join('');
       panel.classList.add('visible');
