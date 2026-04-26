@@ -404,75 +404,6 @@
       margin-bottom: 2px;
     }
 
-    /* ── API Key Modal ── */
-    #apikey-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-    }
-    #apikey-modal.show { display: -webkit-box; display: -webkit-flex; display: flex; }
-    .modal-backdrop {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.6);
-      -webkit-backdrop-filter: blur(4px);
-      backdrop-filter: blur(4px);
-    }
-    .modal-box {
-      position: relative;
-      background: rgba(30,30,50,0.95);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 20px;
-      padding: 32px 28px;
-      max-width: 360px;
-      width: 90%;
-      text-align: center;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      box-shadow: 0 8px 40px rgba(0,0,0,0.3);
-    }
-    .modal-icon { font-size: 40px; margin-bottom: 12px; }
-    .modal-box h2 { font-size: 18px; color: rgba(255,255,255,0.95); margin-bottom: 10px; }
-    .modal-box p { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.5; margin-bottom: 20px; }
-    #apikey-input {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 12px;
-      background: rgba(255,255,255,0.1);
-      color: rgba(255,255,255,0.9);
-      font-size: 14px;
-      outline: none;
-      margin-bottom: 12px;
-      box-sizing: border-box;
-    }
-    #apikey-input:focus { border-color: rgba(91,106,240,0.6); }
-    #apikey-input::placeholder { color: rgba(255,255,255,0.35); }
-    #apikey-save {
-      width: 100%;
-      padding: 12px;
-      background: rgba(91,106,240,0.7);
-      border: 1px solid rgba(91,106,240,0.5);
-      border-radius: 12px;
-      color: white;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    #apikey-save:hover { background: rgba(91,106,240,0.85); }
-    .modal-hint { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 12px; }
-    .modal-hint a { color: rgba(91,106,240,0.7); text-decoration: none; }
-
     /* ── Chat Button ── */
     #chat-btn {
       position: fixed;
@@ -707,19 +638,6 @@
   </div>
 
   <div id="toast"></div>
-
-  <!-- ── API Key Setup Modal ── -->
-  <div id="apikey-modal">
-    <div class="modal-backdrop"></div>
-    <div class="modal-box">
-      <div class="modal-icon">🔑</div>
-      <h2>Connect AI Coach</h2>
-      <p>Paste your MiniMax API key to enable the AI conversation coach. Your key is stored only in your browser's local storage — it never leaves your device.</p>
-      <input type="password" id="apikey-input" placeholder="sk-cp-..." autocomplete="off">
-      <button id="apikey-save">Save & Start Chatting</button>
-      <div class="modal-hint">Get your key at <a href="https://platform.minimaxi.com" target="_blank">platform.minimaxi.com</a></div>
-    </div>
-  </div>
 
   <script>
     // ── Data ──────────────────────────────────────────────
@@ -1124,32 +1042,23 @@
       }
     }
 
-    function showKeyModal() {
-      const modal = document.getElementById('apikey-modal');
-      modal.classList.add('show');
-      document.getElementById('apikey-input').focus();
-    }
-
-    function hideKeyModal() {
-      document.getElementById('apikey-modal').classList.remove('show');
-    }
-
-    document.getElementById('apikey-save').onclick = () => {
-      const key = document.getElementById('apikey-input').value.trim();
-      if (!key) return;
+    function saveAPIKey(key) {
       try {
         localStorage.setItem(KEY_STORAGE, key);
       } catch (e) {
-        // localStorage blocked — fall back to sessionStorage
         try { sessionStorage.setItem(KEY_STORAGE, key); } catch (e2) {}
       }
-      hideKeyModal();
-      showToast('API key saved! Start chatting 😊');
-    };
+    }
 
-    document.getElementById('apikey-input').onkeydown = (e) => {
-      if (e.key === 'Enter') document.getElementById('apikey-save').click();
-    };
+    function promptForKey() {
+      const saved = getAPIKey();
+      if (saved) return saved;
+      const key = prompt('🔑 Paste your MiniMax API key:\n\n(Get it at platform.minimaxi.com)\n\nYour key is stored only in your browser.');
+      if (key && key.trim()) {
+        saveAPIKey(key.trim());
+      }
+      return key ? key.trim() : null;
+    }
 
     // ── Chat ──────────────────────────────────────────────
     const chatBtn = document.getElementById('chat-btn');
@@ -1160,19 +1069,20 @@
     const chatMessages = document.getElementById('chat-messages');
 
     chatBtn.onclick = () => {
-      if (!getAPIKey()) {
-        showKeyModal();
-        return;
+      const key = getAPIKey();
+      if (!key) {
+        const newKey = promptForKey();
+        if (!newKey) return;
       }
       chatPanel.classList.add('open');
     };
     closeChat.onclick = () => chatPanel.classList.remove('open');
 
     async function sendToAI(userText) {
-      const apiKey = getAPIKey();
+      let apiKey = getAPIKey();
       if (!apiKey) {
-        showKeyModal();
-        return "Please add your API key first 😊";
+        apiKey = promptForKey();
+        if (!apiKey) return "Please add your API key first 😊";
       }
 
       const active = state.sentences.filter(s => !s.learned);
@@ -1242,17 +1152,9 @@ Roleplay naturally as a native English-speaking colleague or manager. Respond to
     }
 
     // ── Init ──────────────────────────────────────────────
-    try {
-      if (!getAPIKey()) {
-        showKeyModal();
-      }
-    } catch (e) {
-      showKeyModal();
-    }
-    try {
-      renderSentences();
-      renderCalendar();
-    } catch (e) {}
+    // Try to load key silently; chat button will prompt if missing
+    try { renderSentences(); } catch (e) {}
+    try { renderCalendar(); } catch (e) {}
   </script>
 </body>
 </html>
