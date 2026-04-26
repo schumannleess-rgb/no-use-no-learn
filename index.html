@@ -644,7 +644,8 @@
           history: parsed.history || {},
           currentMonth: new Date().getMonth(),
           currentYear: new Date().getFullYear(),
-          calendarExpanded: parsed.calendarExpanded || false
+          calendarExpanded: parsed.calendarExpanded || false,
+          weekAnchor: parsed.weekAnchor || null
         };
       }
       return {
@@ -653,7 +654,8 @@
         history: {},
         currentMonth: new Date().getMonth(),
         currentYear: new Date().getFullYear(),
-        calendarExpanded: false
+        calendarExpanded: false,
+        weekAnchor: null
       };
     }
 
@@ -663,7 +665,8 @@
         history: state.history,
         currentMonth: state.currentMonth,
         currentYear: state.currentYear,
-        calendarExpanded: state.calendarExpanded
+        calendarExpanded: state.calendarExpanded,
+        weekAnchor: state.weekAnchor
       }));
     }
 
@@ -833,7 +836,19 @@
 
     // ── Calendar ─────────────────────────────────────────
     function toggleCalendar() {
-      state.calendarExpanded = !state.calendarExpanded;
+      const wasExpanded = state.calendarExpanded;
+      state.calendarExpanded = !wasExpanded;
+      if (wasExpanded) {
+        // Switching from month → week: init weekAnchor from current month/year
+        const firstDay = new Date(state.currentYear, state.currentMonth, 1);
+        const dow = firstDay.getDay();
+        const mondayOffset = dow === 0 ? -6 : 1 - dow;
+        const monday = new Date(state.currentYear, state.currentMonth, 1 + mondayOffset);
+        state.weekAnchor = monday.toISOString().slice(0, 10);
+      } else {
+        // Switching from week → month: clear weekAnchor
+        state.weekAnchor = null;
+      }
       saveState();
       renderCalendar();
     }
@@ -844,13 +859,29 @@
       const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       const expanded = state.calendarExpanded;
 
-      document.getElementById('month-label').textContent = `${monthNames[month]} ${year}`;
-
-      // Update toggle button icon
-      document.getElementById('toggle-calendar').textContent = expanded ? '▼' : '⤢';
+      // In week mode, init weekAnchor to Monday of the week containing day 1 of current month
+      if (!expanded && !state.weekAnchor) {
+        const firstDay = new Date(year, month, 1);
+        const dow = firstDay.getDay(); // 0=Sun
+        const mondayOffset = dow === 0 ? -6 : 1 - dow; // days back to Monday
+        const monday = new Date(year, month, 1 + mondayOffset);
+        state.weekAnchor = monday.toISOString().slice(0, 10);
+      }
 
       const today = new Date();
       const todayStr = today.toISOString().slice(0, 10);
+
+      // Week mode header: show month of the Sunday in the displayed week
+      if (!expanded && state.weekAnchor) {
+        const sunday = new Date(state.weekAnchor);
+        sunday.setDate(sunday.getDate() + 6);
+        document.getElementById('month-label').textContent = `${monthNames[sunday.getMonth()]} ${sunday.getFullYear()}`;
+      } else {
+        document.getElementById('month-label').textContent = `${monthNames[month]} ${year}`;
+      }
+
+      // Update toggle button icon
+      document.getElementById('toggle-calendar').textContent = expanded ? '▼' : '⤢';
 
       const grid = document.getElementById('days-grid');
       grid.innerHTML = '';
@@ -875,13 +906,8 @@
           grid.innerHTML += `<div class="${classes}" data-date="${dateStr}" onclick="selectDay('${dateStr}')">${d}</div>`;
         }
       } else {
-        // ── Single week view (current week) ─────────────
-        // Find Monday of current week
-        const todayDayOfWeek = today.getDay(); // 0=Sun
-        const mondayOffset = todayDayOfWeek === 0 ? -6 : 1 - todayDayOfWeek;
-        const monday = new Date(today);
-        monday.setDate(today.getDate() + mondayOffset);
-
+        // ── Single week view (Mon→Sun) ─────────────────
+        const monday = new Date(state.weekAnchor);
         for (let i = 0; i < 7; i++) {
           const d = new Date(monday);
           d.setDate(monday.getDate() + i);
@@ -891,8 +917,7 @@
           let classes = 'day-cell';
           if (hasData) classes += ' has-data';
           if (isToday) classes += ' today';
-          const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-          grid.innerHTML += `<div class="${classes}" data-date="${dateStr}" onclick="selectDay('${dateStr}')"><div style="font-size:10px;color:rgba(255,255,255,0.5)">${dayNames[i]}</div><div>${d.getDate()}</div></div>`;
+          grid.innerHTML += `<div class="${classes}" data-date="${dateStr}" onclick="selectDay('${dateStr}')">${d.getDate()}</div>`;
         }
       }
     }
@@ -936,11 +961,9 @@
         }
       } else {
         // Week mode: go back one week
-        const today = new Date();
-        const todayDayOfWeek = today.getDay();
-        const mondayOffset = todayDayOfWeek === 0 ? -6 : 1 - todayDayOfWeek;
-        const monday = new Date(today);
-        monday.setDate(today.getDate() + mondayOffset - 7);
+        const monday = new Date(state.weekAnchor);
+        monday.setDate(monday.getDate() - 7);
+        state.weekAnchor = monday.toISOString().slice(0, 10);
         state.currentYear = monday.getFullYear();
         state.currentMonth = monday.getMonth();
       }
@@ -958,11 +981,9 @@
         }
       } else {
         // Week mode: go forward one week
-        const today = new Date();
-        const todayDayOfWeek = today.getDay();
-        const mondayOffset = todayDayOfWeek === 0 ? -6 : 1 - todayDayOfWeek;
-        const monday = new Date(today);
-        monday.setDate(today.getDate() + mondayOffset + 7);
+        const monday = new Date(state.weekAnchor);
+        monday.setDate(monday.getDate() + 7);
+        state.weekAnchor = monday.toISOString().slice(0, 10);
         state.currentYear = monday.getFullYear();
         state.currentMonth = monday.getMonth();
       }
