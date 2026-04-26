@@ -109,16 +109,34 @@
       margin-top: 2px;
       display: flex;
       align-items: center;
+      gap: 6px;
+    }
+    .scene-tag-pill {
+      display: inline-flex;
+      align-items: center;
       gap: 4px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
     }
-    .scene-dot {
-      font-size: 8px;
-      margin-right: 1px;
+    .scene-tag-pill.report  {
+      background: rgba(232,168,56,0.18);
+      border: 1px solid rgba(232,168,56,0.5);
+      color: rgba(232,168,56,0.95);
     }
-    .scene-dot.report   { color: #e8a838; }
-    .scene-dot.chat     { color: #38c8b0; }
-    .scene-dot.meeting  { color: #c0576a; }
-    .scene-dot + span:last-child { margin-left: 8px; }
+    .scene-tag-pill.chat   {
+      background: rgba(56,200,176,0.18);
+      border: 1px solid rgba(56,200,176,0.5);
+      color: rgba(56,200,176,0.95);
+    }
+    .scene-tag-pill.meeting {
+      background: rgba(192,87,106,0.18);
+      border: 1px solid rgba(192,87,106,0.5);
+      color: rgba(192,87,106,0.95);
+    }
 
     /* ── Sentences ── */
     .section-title {
@@ -490,11 +508,9 @@
   <header>
     <div class="lang-badge">🇬🇧 英语</div>
     <div class="subtitle">
-      <span class="scene-dot report">●</span>汇报
-      &nbsp;&nbsp;
-      <span class="scene-dot chat">●</span>闲聊
-      &nbsp;&nbsp;
-      <span class="scene-dot meeting">●</span>会议
+      <span class="scene-tag-pill report">● 汇报</span>
+      <span class="scene-tag-pill chat">● 闲聊</span>
+      <span class="scene-tag-pill meeting">● 会议</span>
     </div>
   </header>
 
