@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Lingo — Language Learning</title>
+  <style>
+    :root {
+      --bg: transparent;
+      --card: rgba(255,255,255,0.12);
+      --card-hover: rgba(255,255,255,0.2);
+      --primary: #5b6af0;
+      --primary-light: rgba(255,255,255,0.2);
+      --text: rgba(255,255,255,0.95);
+      --text-secondary: rgba(255,255,255,0.65);
+      --border: rgba(255,255,255,0.15);
+      --success: #10b981;
+      --success-light: rgba(16,185,129,0.2);
+      --danger: #ef4444;
+      --radius: 16px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.1);
+      --scene-report: #e8a838;
+      --scene-chat: #38c8b0;
+      --scene-meeting: #c0576a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(160deg, rgba(60,50,40,1) 0%, rgba(80,60,55,1) 40%, rgba(55,50,75,1) 100%);
+      background-attachment: fixed;
+      color: white;
+      min-height: 100vh;
+      padding-bottom: 100px;
+      overflow-x: hidden;
+    }
+
+    /* ── Lingo Banner ── */
+    .lingo-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1;
+      pointer-events: none;
+      height: 200px;
+      background: transparent;
+      overflow: visible;
+    }
+    .lingo-phrases {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .lingo-phrases span {
+      position: absolute;
+      font-size: 22px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.35);
+      white-space: nowrap;
+    }
+    @keyframes lingoBreath {
+      from { transform: scale(1.4); opacity: 0.45; }
+      to   { transform: scale(0.7); opacity: 0.08; }
+    }
+    .lingo-phrases span:nth-child(1)  { left:4vw;    top:8px;   animation: lingoBreath 3.00s ease-in-out -0.12s infinite alternate; }
+    .lingo-phrases span:nth-child(2)  { left:14vw;   top:28px;  animation: lingoBreath 3.75s ease-in-out -1.83s infinite alternate; }
+    .lingo-phrases span:nth-child(3)  { left:24vw;   top:50px;  animation: lingoBreath 4.50s ease-in-out -3.54s infinite alternate; }
+    .lingo-phrases span:nth-child(4)  { left:34vw;   top:75px;  animation: lingoBreath 5.25s ease-in-out -0.47s infinite alternate; }
+    .lingo-phrases span:nth-child(5)  { left:44vw;   top:95px;  animation: lingoBreath 3.00s ease-in-out -2.91s infinite alternate; }
+    .lingo-phrases span:nth-child(6)  { left:54vw;   top:115px; animation: lingoBreath 3.75s ease-in-out -4.22s infinite alternate; }
+    .lingo-phrases span:nth-child(7)  { left:64vw;   top:140px; animation: lingoBreath 4.50s ease-in-out -1.66s infinite alternate; }
+    .lingo-phrases span:nth-child(8)  { left:74vw;   top:160px; animation: lingoBreath 5.25s ease-in-out -3.08s infinite alternate; }
+    .lingo-phrases span:nth-child(9)  { left:84vw;   top:12px;  animation: lingoBreath 3.00s ease-in-out -0.55s infinite alternate; }
+    .lingo-phrases span:nth-child(10) { left:8vw;    top:55px;  animation: lingoBreath 3.75s ease-in-out -2.73s infinite alternate; }
+    .lingo-phrases span:nth-child(11) { left:50vw;   top:80px;  animation: lingoBreath 4.50s ease-in-out -1.14s infinite alternate; }
+    .lingo-phrases span:nth-child(12) { left:70vw;   top:105px; animation: lingoBreath 5.25s ease-in-out -4.55s infinite alternate; }
+    </style>
+    <style>
+    /* ── Header ── */
+    header {
+      background: transparent;
+      color: rgba(255,255,255,0.95);
+      padding: 200px 20px 16px;
+      border-radius: 0;
+    }
+    .lang-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.95);
+    }
+    .subtitle {
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .scene-tag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .scene-tag-pill.report  {
+      background: rgba(232,168,56,0.18);
+      border: 1px solid rgba(232,168,56,0.5);
+      color: rgba(232,168,56,0.95);
+    }
+    .scene-tag-pill.chat   {
+      background: rgba(56,200,176,0.18);
+      border: 1px solid rgba(56,200,176,0.5);
+      color: rgba(56,200,176,0.95);
+    }
+    .scene-tag-pill.meeting {
+      background: rgba(192,87,106,0.18);
+      border: 1px solid rgba(192,87,106,0.5);
+      color: rgba(192,87,106,0.95);
+    }
+
+    /* ── Topic Badge ── */
+    .topic-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 2px 8px;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+    .topic-badge.topic-report   { background: rgba(232,168,56,0.2); border: 1px solid rgba(232,168,56,0.5); color: rgba(232,168,56,0.95); }
+    .topic-badge.topic-chat     { background: rgba(56,200,176,0.2); border: 1px solid rgba(56,200,176,0.5); color: rgba(56,200,176,0.95); }
+    .topic-badge.topic-meeting  { background: rgba(192,87,106,0.2); border: 1px solid rgba(192,87,106,0.5); color: rgba(192,87,106,0.95); }
+    .topic-badge.topic-default  { background: rgba(130,120,200,0.2); border: 1px solid rgba(130,120,200,0.5); color: rgba(180,170,240,0.95); }
+
+    /* ── Topic Filter Tabs ── */
+    #topic-filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    #topic-filters .scene-tag-pill {
+      opacity: 0.5;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    #topic-filters .scene-tag-pill:hover { opacity: 0.75; transform: scale(1.05); }
+    #topic-filters .scene-tag-pill.active { opacity: 1; font-weight: 700; transform: scale(1.08); }
+
+    /* ── Sentences ── */
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.55);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 16px 16px 8px;
+    }
+
+    #app {
+      padding-top: 200px;
+    }
+
+    #sentence-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 0 16px;
+    }
+
+    .sentence-card {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: transform 0.15s, opacity 0.3s, border-radius 0.4s;
+      cursor: pointer;
+      position: relative;
+      overflow: visible;
+      color: #fff;
+      touch-action: pan-y;
+      user-select: none;
+    }
+    .sentence-card.report   {
+      background: rgba(232,168,56,0.15);
+      border: 2px solid rgba(232,168,56,0.85);
+      box-shadow: 0 0 0 2px rgba(232,168,56,0.1), 0 4px 20px rgba(232,168,56,0.2), 0 1px 4px rgba(0,0,0,0.15);
+    }
+    .sentence-card.chat    {
+      background: rgba(56,200,176,0.15);
+      border: 2px solid rgba(56,200,176,0.85);
+      box-shadow: 0 0 0 2px rgba(56,200,176,0.1), 0 4px 20px rgba(56,200,176,0.2), 0 1px 4px rgba(0,0,0,0.15);
+    }
+    .sentence-card.meeting {
+      background: rgba(192,87,106,0.15);
+      border: 2px solid rgba(192,87,106,0.85);
+      box-shadow: 0 0 0 2px rgba(192,87,106,0.1), 0 4px 20px rgba(192,87,106,0.2), 0 1px 4px rgba(0,0,0,0.15);
+    }
+    .sentence-card.learned {
+      opacity: 0;
+      transform: translateX(30px);
+      height: 0;
+      padding: 0;
+      margin: 0;
+      pointer-events: none;
+    }
+    .sentence-card.sliding {
+      cursor: grabbing;
+      transition: none;
+    }
+    .sentence-card.animating {
+      position: fixed;
+      z-index: 998;
+      pointer-events: none;
+    }
+    .sentence-card.shrinking {
+      overflow: visible;
+    }
+    .sentence-card .en-text,
+    .sentence-card .card-text {
+      flex: 1;
+      font-size: 15px;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.95);
+    }
+    .sentence-card .card-cn {
+      font-size: 12px;
+      color: rgba(255,255,255,0.55);
+      margin-top: 2px;
+    }
+    .sentence-card .card-content {
+      flex: 1;
+      font-size: 14px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.9);
+    }
+
+    /* Knowledge cards — neutral purple tint */
+    .knowledge-card {
+      background: rgba(130,120,200,0.12);
+      border: 2px solid rgba(130,120,200,0.5);
+      box-shadow: 0 0 0 2px rgba(130,120,200,0.08), 0 4px 20px rgba(130,120,200,0.15), 0 1px 4px rgba(0,0,0,0.1);
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .knowledge-card .card-check {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+    }
+    .knowledge-card .topic-badge {
+      align-self: flex-start;
+    }
+
+    .sentence-card .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .icon-btn.speak {
+      background: rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.9);
+    }
+    .icon-btn.speak:active { background: rgba(255,255,255,0.25); }
+    .icon-btn.done {
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.8);
+    }
+    .icon-btn.done:active { background: rgba(255,255,255,0.2); }
+
+    /* ── Card check badge ── */
+    .sentence-card { position: relative; }
+    .sentence-card .card-check {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.85);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.15s;
+      z-index: 2;
+    }
+    .sentence-card.report .card-check   { border-color: rgba(232,168,56,0.7); color: rgba(232,168,56,0.9); }
+    .sentence-card.chat .card-check     { border-color: rgba(56,200,176,0.7); color: rgba(56,200,176,0.9); }
+    .sentence-card.meeting .card-check  { border-color: rgba(192,87,106,0.7); color: rgba(192,87,106,0.9); }
+    .sentence-card .card-check:hover { transform: scale(1.15); }
+    .sentence-card .card-check:active { transform: scale(0.95); }
+
+    /* ── Star particle ── */
+    .star-particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── Calendar ── */
+    .calendar-wrap {
+      padding: 16px;
+    }
+    .calendar-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .calendar-nav button {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      width: 36px;
+      height: 36px;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.8);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .calendar-nav button:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .calendar-nav .month-label {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    #toggle-calendar {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      width: 36px;
+      height: 36px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.7);
+      margin-left: 8px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    #toggle-calendar:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .calendar-grid {
+      background: rgba(255,255,255,0.1);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      background: rgba(91,106,240,0.25);
+      color: rgba(255,255,255,0.7);
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .weekdays div { padding: 8px 0; }
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+    .day-cell {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+      position: relative;
+      border-radius: 50%;
+      transition: background 0.15s, backdrop-filter 0.15s;
+    }
+    .day-cell.empty { pointer-events: none; }
+    .day-cell.has-data::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(91,106,240,0.7);
+    }
+    .day-cell.has-data { color: rgba(91,106,240,0.9); font-weight: 600; }
+    .day-cell.today { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); }
+    .day-cell.selected { background: rgba(91,106,240,0.5); color: white; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+    .day-cell:active { opacity: 0.7; }
+
+    /* ── Day Detail Panel ── */
+    #day-panel {
+      background: rgba(255,255,255,0.1);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      margin: 10px 16px 0;
+      padding: 14px 16px;
+      display: none;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    #day-panel.visible { display: block; }
+    #day-panel h3 { font-size: 14px; margin-bottom: 10px; color: rgba(255,255,255,0.65); }
+    #day-panel .history-item {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    #day-panel .history-item:last-child { border-bottom: none; }
+    #day-panel .history-scene {
+      font-size: 11px;
+      color: rgba(91,106,240,0.85);
+      margin-bottom: 2px;
+    }
+
+    /* ── Chat Button ── */
+    #chat-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(91,106,240,0.4);
+      border: 1.5px solid rgba(91,106,240,0.6);
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(91,106,240,0.25);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s, background 0.15s;
+    }
+    #chat-btn:hover { background: rgba(91,106,240,0.55); }
+    #chat-btn:active { transform: scale(0.95); }
+
+    /* ── Chat Panel ── */
+    #chat-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 70vh;
+      background: rgba(30,30,50,0.85);
+      border-radius: 24px 24px 0 0;
+      box-shadow: 0 -4px 30px rgba(0,0,0,0.2);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #chat-panel.open { transform: translateY(0); }
+    #chat-panel .chat-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(91,106,240,0.3);
+      color: rgba(255,255,255,0.9);
+      border-radius: 24px 24px 0 0;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    #chat-panel .chat-header span { font-size: 16px; font-weight: 600; }
+    #chat-panel .close-chat {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: rgba(255,255,255,0.8);
+      font-size: 24px;
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .msg { max-width: 80%; padding: 10px 14px; border-radius: 16px; font-size: 15px; line-height: 1.5; }
+    .msg.ai { background: rgba(255,255,255,0.12); align-self: flex-start; border-bottom-left-radius: 4px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+    .msg.user { background: rgba(91,106,240,0.5); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .msg .sender { font-size: 11px; opacity: 0.6; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+    .msg .ai-text { line-height: 1.5; }
+    .add-sentence-btn {
+      background: rgba(91,106,240,0.4);
+      border: 1px solid rgba(91,106,240,0.6);
+      border-radius: 8px;
+      color: white;
+      font-size: 13px;
+      padding: 2px 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .add-sentence-btn:hover { background: rgba(91,106,240,0.7); }
+    #chat-input-row {
+      padding: 12px 16px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      gap: 8px;
+      background: rgba(255,255,255,0.05);
+    }
+    #chat-input {
+      flex: 1;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 24px;
+      padding: 10px 16px;
+      font-size: 15px;
+      outline: none;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.9);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    #chat-input::placeholder { color: rgba(255,255,255,0.4); }
+    #chat-input:focus { border-color: rgba(91,106,240,0.6); }
+    #chat-send {
+      background: rgba(91,106,240,0.5);
+      color: white;
+      border: 1px solid rgba(91,106,240,0.5);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: #1a1a2e;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 24px;
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s;
+      z-index: 300;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Empty state ── */
+    .empty-card {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+    }
+    .empty-card .emoji { font-size: 48px; margin-bottom: 10px; }
+    .empty-card p { font-size: 15px; }
+    .add-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 20px;
+      font-size: 14px;
+      margin-top: 12px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ Lingo Banner ══ -->
+  <div class="lingo-banner">
+    <div class="lingo-phrases" id="lingo-phrases">
+      <span style="--i:0">不用不学</span>
+      <span style="--i:1">No use, No learn</span>
+      <span style="--i:2">Pas d'utilisation, pas d'apprentissage</span>
+      <span style="--i:3">唔用就唔學</span>
+      <span style="--i:4">不消就不学</span>
+      <span style="--i:5">Không dùng, không học</span>
+      <span style="--i:6">ไม่ใช้ไม่เรียน</span>
+      <span style="--i:7">使わなければ学ばない</span>
+      <span style="--i:8">사용하지 않으면 배우지 않는다</span>
+      <span style="--i:9">不用不学</span>
+      <span style="--i:10">不用不学</span>
+      <span style="--i:11">不用不学</span>
+    </div>
+  </div>
+
+  <header>
+    <div class="lang-badge">🇬🇧 English</div>
+    <div class="subtitle" id="topic-filters">
+      <span class="scene-tag-pill report active" data-topic="All" onclick="filterByTopic('All')">● All</span>
+      <span class="scene-tag-pill report" data-topic="Report" onclick="filterByTopic('Report')">● Report</span>
+      <span class="scene-tag-pill chat" data-topic="Chat" onclick="filterByTopic('Chat')">● Chat</span>
+      <span class="scene-tag-pill meeting" data-topic="Meeting" onclick="filterByTopic('Meeting')">● Meeting</span>
+    </div>
+  </header>
+
+  <div class="section-title">Learning Library · <span id="count">9</span> cards</div>
+
+  <div id="sentence-list"></div>
+
+  <div class="section-title" style="margin-top:8px;">📅 Learning Journal</div>
+  <div class="calendar-wrap">
+    <div class="calendar-nav">
+      <button id="prev-month">‹</button>
+      <span class="month-label" id="month-label"></span>
+      <button id="next-month">›</button>
+      <button id="toggle-calendar" onclick="toggleCalendar()" title="Toggle week/month">⤢</button>
+    </div>
+    <div class="calendar-grid">
+      <div class="weekdays">
+        <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+      </div>
+      <div class="days-grid" id="days-grid"></div>
+    </div>
+  </div>
+
+  <div id="day-panel">
+    <h3 id="day-panel-title"></h3>
+    <div id="day-panel-list"></div>
+  </div>
+
+  <button id="chat-btn">💬</button>
+
+  <div id="chat-panel">
+    <div class="chat-header">
+      <span>AI Chat Practice</span>
+      <button class="close-chat" id="close-chat">✕</button>
+    </div>
+    <div id="chat-messages">
+      <div class="msg ai">
+        <div class="sender">AI Coach</div>
+        Hi! Let's practice some English. I'll act as your colleague or manager — try responding naturally in English.
+      </div>
+    </div>
+    <div id="chat-input-row">
+      <input id="chat-input" placeholder="Type in English to practice..." autocomplete="off">
+      <button id="chat-send">➤</button>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    // ── Data ──────────────────────────────────────────────
+    const INITIAL_SENTENCES = [
+      { id: 1, type: 'language', en: "I'd flag that the numbers are trending in the right direction — but I want to flag a couple of caveats.", cn: '', topic: "Report", learned: false },
+      { id: 2, type: 'language', en: "To put it in perspective, we outperform the industry average by roughly 20%.", cn: '', topic: "Report", learned: false },
+      { id: 3, type: 'language', en: "Based on what I'm seeing, I'd push back on moving forward at this pace.", cn: '', topic: "Report", learned: false },
+      { id: 4, type: 'language', en: "I'm on the fence about the new tooling, but I'll give it a shot and circle back.", cn: '', topic: "Chat", learned: false },
+      { id: 5, type: 'language', en: "The roadmap's still up in the air — I wouldn't count on it being finalized just yet.", cn: '', topic: "Chat", learned: false },
+      { id: 6, type: 'language', en: "To build on what [Name] just said — the underlying assumption is that churn stabilizes by Q3.", cn: '', topic: "Meeting", learned: false },
+      { id: 7, type: 'language', en: "Just to make sure I'm following — are you saying we'd pause the rollout entirely?", cn: '', topic: "Meeting", learned: false },
+      { id: 8, type: 'language', en: "I'm not convinced the marginal gain justifies the added complexity, but I'm open to being persuaded.", cn: '', topic: "Meeting", learned: false },
+      { id: 9, type: 'language', en: "I'd lean toward shipping a simpler version first and iterating based on feedback.", cn: '', topic: "Meeting", learned: false },
+    ];
+
+    let state = loadState();
+    state.activeFilter = state.activeFilter || 'All';
+
+    function loadState() {
+      const saved = localStorage.getItem('lingo-state');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Rebuild language cards from IDs + full list
+        const learnedIds = parsed.learned || [];
+        const languageIds = new Set(INITIAL_SENTENCES.map(s => s.id));
+        const sentences = INITIAL_SENTENCES.map(s => ({
+          ...s,
+          learned: learnedIds.includes(s.id)
+        }));
+        // Migrate any existing custom sentences (might have old format)
+        if (parsed.sentences) {
+          for (const s of parsed.sentences) {
+            // Skip if it's one of our initial sentences (already added above)
+            if (languageIds.has(s.id)) continue;
+            // Migrate old format: scene → topic, add type
+            if (!s.type) {
+              s.type = s.type || (s.en ? 'language' : 'knowledge');
+            }
+            if (!s.topic && s.scene) {
+              s.topic = s.scene;
+              delete s.scene;
+            }
+            sentences.push(s);
+          }
+        }
+        return {
+          sentences,
+          learned: parsed.learned || [],
+          history: parsed.history || {},
+          currentMonth: new Date().getMonth(),
+          currentYear: new Date().getFullYear(),
+          calendarExpanded: parsed.calendarExpanded || false,
+          weekAnchor: parsed.weekAnchor || null
+        };
+      }
+      return {
+        sentences: INITIAL_SENTENCES.map(s => ({ ...s, learned: false })),
+        learned: [],
+        history: {},
+        currentMonth: new Date().getMonth(),
+        currentYear: new Date().getFullYear(),
+        calendarExpanded: false,
+        weekAnchor: null
+      };
+    }
+
+    function saveState() {
+      localStorage.setItem('lingo-state', JSON.stringify({
+        learned: state.learned,
+        history: state.history,
+        currentMonth: state.currentMonth,
+        currentYear: state.currentYear,
+        calendarExpanded: state.calendarExpanded,
+        weekAnchor: state.weekAnchor,
+        sentences: state.sentences
+      }));
+    }
+
+    // Topic → color class mapping
+    function topicColorClass(topic) {
+      const map = {
+        Report: 'topic-report', Chat: 'topic-chat', Meeting: 'topic-meeting'
+      };
+      return map[topic] || 'topic-default';
+    }
+
+    // ── Render Sentences ──────────────────────────────────
+    function renderSentences() {
+      const container = document.getElementById('sentence-list');
+      const active = state.sentences.filter(s => !s.learned && (state.activeFilter === 'All' || s.topic === state.activeFilter));
+
+      document.getElementById('count').textContent = active.length;
+
+      if (active.length === 0) {
+        container.innerHTML = `
+          <div class="empty-card">
+            <div class="emoji">🎉</div>
+            <p>All done! Every card mastered!</p>
+            <button class="add-btn" onclick="refillSentences()">+ Add more</button>
+            <button class="add-btn" onclick="resetProgress()" style="margin-top:8px;background:rgba(255,255,255,0.15)">🔄 Reset & Practice Again</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = active.map(s => {
+        const colorClass = topicColorClass(s.topic);
+        const topicBadge = `<div class="topic-badge ${colorClass}">${s.topic || 'General'}</div>`;
+        const cardClass = s.type === 'knowledge' ? 'knowledge-card' : `sentence-card ${colorClass}`;
+
+        if (s.type === 'knowledge') {
+          return `
+            <div class="${cardClass}" data-id="${s.id}" data-topic="${s.topic}">
+              <div class="card-check" onclick="markLearned(${s.id})" title="Mark as learned">✓</div>
+              ${topicBadge}
+              <div class="card-content">${s.content || s.en}</div>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="${cardClass}" data-id="${s.id}" data-topic="${s.topic}" onclick="speak('${s.id}')">
+              <div class="card-check" onclick="event.stopPropagation(); markLearned(${s.id})" title="Mark as learned">✓</div>
+              ${topicBadge}
+              <div class="card-text">${s.en}</div>
+              ${s.cn ? `<div class="card-cn">${s.cn}</div>` : ''}
+              <button class="icon-btn speak" onclick="event.stopPropagation(); speak('${s.id}')" title="Pronounce">🔊</button>
+            </div>
+          `;
+        }
+      }).join('');
+    }
+
+    function filterByTopic(topic) {
+      state.activeFilter = topic;
+      // Update active tab styling
+      document.querySelectorAll('#topic-filters .scene-tag-pill').forEach(el => {
+        el.classList.toggle('active', el.dataset.topic === topic);
+      });
+      saveState();
+      renderSentences();
+    }
+
+    // ── Mark Learned ─────────────────────────────────────
+    function markLearned(id) {
+      triggerLearnAnimation(id);
+    }
+
+    // Scene color palettes — deep to light gradients
+    const SCENE_COLORS = {
+      Report:   ['#b8721a', '#d49a28', '#e8b84a', '#f0c870', '#f8dda0', '#fae8c0'],
+      Chat:     ['#1a8a7a', '#28b8a0', '#50c8b8', '#80d8cc', '#b0e8de', '#d0f5ed'],
+      Meeting:  ['#90405a', '#a85070', '#c07088', '#d898a8', '#ecb8c4', '#f8d4dc'],
+      General:  ['#7a5aa0', '#9580c0', '#b0a0d8', '#c8b8e8', '#e0d4f5', '#f0ecfa']
+    };
+
+    function createStarParticle(x, y, size, color) {
+      const el = document.createElement('div');
+      el.className = 'star-particle';
+      el.style.left = (x - size / 2) + 'px';
+      el.style.top = (y - size / 2) + 'px';
+      el.style.width = size + 'px';
+      el.style.height = size + 'px';
+      el.style.opacity = '1';
+
+      // Alternate between ★ and dot shapes
+      const isStar = Math.random() > 0.4;
+      if (isStar) {
+        el.innerHTML = '★';
+        el.style.color = color;
+        el.style.fontSize = (size * 0.9) + 'px';
+        el.style.lineHeight = '1';
+        el.style.textShadow = `0 0 ${size * 0.3}px ${color}`;
+      } else {
+        el.style.background = color;
+        el.style.borderRadius = '50%';
+        el.style.boxShadow = `0 0 ${size * 0.5}px ${color}`;
+      }
+
+      document.body.appendChild(el);
+      return el;
+    }
+
+    function triggerLearnAnimation(id) {
+      const card = document.querySelector(`[data-id="${id}"]`);
+      if (!card || card.classList.contains('animating')) return;
+
+      const topic = card.dataset.topic || 'General';
+      const colors = SCENE_COLORS[topic] || SCENE_COLORS.General;
+      const rect = card.getBoundingClientRect();
+
+      // Lock card in place for shatter
+      card.style.position = 'fixed';
+      card.style.left = rect.left + 'px';
+      card.style.top = rect.top + 'px';
+      card.style.width = rect.width + 'px';
+      card.style.height = rect.height + 'px';
+      card.style.margin = '0';
+      card.style.zIndex = '999';
+      card.classList.add('animating');
+
+      // Fade card out quickly as stars spawn
+      card.style.transition = 'opacity 0.4s ease-out';
+      card.style.opacity = '0';
+
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const numParticles = 28;
+
+      // Generate stars from card area
+      for (let i = 0; i < numParticles; i++) {
+        const t = i / numParticles;
+        // Distribute particles within card bounds with slight outward bias
+        const spreadX = rect.width * 0.8;
+        const spreadY = rect.height * 0.8;
+        const px = rect.left + rect.width * 0.1 + Math.random() * spreadX;
+        const py = rect.top + rect.height * 0.1 + Math.random() * spreadY;
+
+        // Size varies: smaller dots, medium stars, occasional large
+        const sizeRand = Math.random();
+        const size = sizeRand < 0.3 ? 4 + Math.random() * 4       // small dots
+                    : sizeRand < 0.75 ? 8 + Math.random() * 8     // medium
+                    : 14 + Math.random() * 10;                     // large stars
+
+        const color = colors[Math.floor(Math.random() * colors.length)];
+
+        const star = createStarParticle(px, py, size, color);
+
+        // Calculate drift direction — outward from center with randomness
+        const dx = (px - cx) * 0.3 + (Math.random() - 0.5) * 60;
+        const dy = (py - cy) * 0.3 - 20 - Math.random() * 40; // slight upward bias
+        const driftDist = 120 + Math.random() * 150;
+
+        requestAnimationFrame(() => {
+          star.style.transition = `all ${2.0 + Math.random() * 1.5}s cubic-bezier(0.1, 0.8, 0.25, 1)`;
+          star.style.left = (px + dx * (driftDist / 80)) + 'px';
+          star.style.top = (py + dy * (driftDist / 80)) + 'px';
+          star.style.opacity = '0';
+          star.style.transform = `scale(${0.2 + Math.random() * 0.3}) rotate(${Math.random() * 360}deg)`;
+        });
+
+        setTimeout(() => star.remove(), 3500);
+      }
+
+      // Complete animation
+      setTimeout(() => {
+        card.remove();
+        const sentence = state.sentences.find(s => s.id === id);
+        if (!sentence) return;
+        sentence.learned = true;
+        if (!state.learned.includes(id)) state.learned.push(id);
+        const today = new Date().toISOString().slice(0,10);
+        if (!state.history[today]) state.history[today] = [];
+        state.history[today].push({ ...sentence, learnedAt: today });
+        saveState();
+        renderSentences();
+        renderCalendar();
+        showToast('✓ Learned!');
+      }, 600);
+    }
+
+    // ── Refill ────────────────────────────────────────────
+    function refillSentences() {
+      showToast('Type in the chat to suggest new scenes 😊');
+    }
+
+    function resetProgress() {
+      if (!confirm('Reset all progress and start over?')) return;
+      localStorage.removeItem('lingo-state');
+      location.reload();
+    }
+
+    // ── TTS ───────────────────────────────────────────────
+    function speak(id) {
+      const audio = new Audio('./audio/sentence_' + id + '.mp3');
+      audio.play().catch(e => {
+        showToast('Audio failed to load. Check your connection.');
+      });
+    }
+
+    // ── Calendar ─────────────────────────────────────────
+    function toggleCalendar() {
+      const wasExpanded = state.calendarExpanded;
+      state.calendarExpanded = !wasExpanded;
+      if (wasExpanded) {
+        // Switching from month → week: init weekAnchor from current month/year
+        const firstDay = new Date(state.currentYear, state.currentMonth, 1);
+        const dow = firstDay.getDay();
+        const mondayOffset = dow === 0 ? -6 : 1 - dow;
+        const monday = new Date(state.currentYear, state.currentMonth, 1 + mondayOffset);
+        state.weekAnchor = monday.toISOString().slice(0, 10);
+      } else {
+        // Switching from week → month: clear weekAnchor
+        state.weekAnchor = null;
+      }
+      saveState();
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const year = state.currentYear;
+      const month = state.currentMonth;
+      const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const expanded = state.calendarExpanded;
+
+      // In week mode, init weekAnchor to Monday of the week containing day 1 of current month
+      if (!expanded && !state.weekAnchor) {
+        const firstDay = new Date(year, month, 1);
+        const dow = firstDay.getDay(); // 0=Sun
+        const mondayOffset = dow === 0 ? -6 : 1 - dow; // days back to Monday
+        const monday = new Date(year, month, 1 + mondayOffset);
+        state.weekAnchor = monday.toISOString().slice(0, 10);
+      }
+
+      const today = new Date();
+      const todayStr = today.toISOString().slice(0, 10);
+
+      // Week mode header: show month of the Sunday in the displayed week
+      if (!expanded && state.weekAnchor) {
+        const sunday = new Date(state.weekAnchor);
+        sunday.setDate(sunday.getDate() + 6);
+        document.getElementById('month-label').textContent = `${monthNames[sunday.getMonth()]} ${sunday.getFullYear()}`;
+      } else {
+        document.getElementById('month-label').textContent = `${monthNames[month]} ${year}`;
+      }
+
+      // Update toggle button icon
+      document.getElementById('toggle-calendar').textContent = expanded ? '▼' : '⤢';
+
+      const grid = document.getElementById('days-grid');
+      grid.innerHTML = '';
+
+      if (expanded) {
+        // ── Full month view ──────────────────────────────
+        const firstDay = new Date(year, month, 1);
+        let startDay = firstDay.getDay();
+        startDay = startDay === 0 ? 7 : startDay;
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        for (let i = 1; i < startDay; i++) {
+          grid.innerHTML += '<div class="day-cell empty"></div>';
+        }
+        for (let d = 1; d <= daysInMonth; d++) {
+          const dateStr = `${year}-${String(month + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+          const hasData = state.history[dateStr];
+          const isToday = dateStr === todayStr;
+          let classes = 'day-cell';
+          if (hasData) classes += ' has-data';
+          if (isToday) classes += ' today';
+          grid.innerHTML += `<div class="${classes}" data-date="${dateStr}" onclick="selectDay('${dateStr}')">${d}</div>`;
+        }
+      } else {
+        // ── Single week view (Mon→Sun) ─────────────────
+        const monday = new Date(state.weekAnchor);
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(monday);
+          d.setDate(monday.getDate() + i);
+          const dateStr = d.toISOString().slice(0, 10);
+          const hasData = state.history[dateStr];
+          const isToday = dateStr === todayStr;
+          let classes = 'day-cell';
+          if (hasData) classes += ' has-data';
+          if (isToday) classes += ' today';
+          grid.innerHTML += `<div class="${classes}" data-date="${dateStr}" onclick="selectDay('${dateStr}')">${d.getDate()}</div>`;
+        }
+      }
+    }
+
+    function selectDay(dateStr) {
+      // Deselect all
+      document.querySelectorAll('.day-cell').forEach(el => el.classList.remove('selected'));
+      // Select this one
+      const cell = document.querySelector(`[data-date="${dateStr}"]`);
+      if (cell) cell.classList.add('selected');
+
+      const history = state.history[dateStr];
+      const panel = document.getElementById('day-panel');
+      const list = document.getElementById('day-panel-list');
+      const title = document.getElementById('day-panel-title');
+
+      if (!history || history.length === 0) {
+        title.textContent = `${dateStr} — no practice yet`;
+        list.innerHTML = '<div style="color:#6b7280;font-size:14px;text-align:center;padding:10px 0;">No records yet</div>';
+        panel.classList.add('visible');
+        return;
+      }
+
+      title.textContent = `${dateStr} — ${history.length} cards learned`;
+      list.innerHTML = history.map(s => `
+        <div class="history-item">
+          <div class="history-scene">${s.topic || s.scene || 'General'}</div>
+          <div>${s.en || s.content}</div>
+        </div>
+      `).join('');
+      panel.classList.add('visible');
+    }
+
+    document.getElementById('prev-month').onclick = () => {
+      if (state.calendarExpanded) {
+        // Month mode: go back one month
+        state.currentMonth--;
+        if (state.currentMonth < 0) {
+          state.currentMonth = 11;
+          state.currentYear--;
+        }
+      } else {
+        // Week mode: go back one week
+        const monday = new Date(state.weekAnchor);
+        monday.setDate(monday.getDate() - 7);
+        state.weekAnchor = monday.toISOString().slice(0, 10);
+        state.currentYear = monday.getFullYear();
+        state.currentMonth = monday.getMonth();
+      }
+      saveState();
+      renderCalendar();
+    };
+
+    document.getElementById('next-month').onclick = () => {
+      if (state.calendarExpanded) {
+        // Month mode: go forward one month
+        state.currentMonth++;
+        if (state.currentMonth > 11) {
+          state.currentMonth = 0;
+          state.currentYear++;
+        }
+      } else {
+        // Week mode: go forward one week
+        const monday = new Date(state.weekAnchor);
+        monday.setDate(monday.getDate() + 7);
+        state.weekAnchor = monday.toISOString().slice(0, 10);
+        state.currentYear = monday.getFullYear();
+        state.currentMonth = monday.getMonth();
+      }
+      saveState();
+      renderCalendar();
+    };
+
+    // ── API Keys ─────────────────────────────────────────
+    const MINIMAX_KEY = 'sk-cp-V62MPBT_iXeyvWZ9XE-Cy0wlbdrO8KG_O_EcKel8Dt6thpsvHjDquXHNMOXxfjoc6W_A2L7RC0Gxi7lAiWUV2w2aGUKt4v1aOA8yBB0bT6cYo7TjM71WMtA';
+    const GLM_KEY = '7da4b1460ca14cfea7872f01e3115a75.NNqzuQIw9Q68i73I';
+
+    // ── Chat ──────────────────────────────────────────────
+    const chatBtn = document.getElementById('chat-btn');
+    const chatPanel = document.getElementById('chat-panel');
+    const closeChat = document.getElementById('close-chat');
+    const chatInput = document.getElementById('chat-input');
+    const chatSend = document.getElementById('chat-send');
+    const chatMessages = document.getElementById('chat-messages');
+
+    chatBtn.onclick = () => {
+      chatPanel.classList.add('open');
+    };
+    closeChat.onclick = () => chatPanel.classList.remove('open');
+
+    async function sendToAI(userText) {
+      const active = state.sentences.filter(s => !s.learned);
+      const activeEn = active.map(s => s.en).join('\n');
+
+      const systemPrompt = `You are an AI English conversation coach. The user is practicing English for workplace communication (Report, Chat, Meeting).
+
+Current active sentences to practice from:
+${activeEn}
+
+Roleplay naturally as a native English-speaking colleague or manager. Respond to the user's message naturally, giving them something to respond to. Keep responses short (1-3 sentences). If they want to add new scenes or refill sentences, help them do so. Always respond in English, and occasionally give brief feedback on their English. Be encouraging and natural.`;
+
+      // GLM only — MiniMax text chat needs CORS proxy (use GLM for now)
+      try {
+        const res = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${GLM_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'glm-4-flash',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userText }
+            ],
+            temperature: 0.7
+          })
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error('GLM error:', res.status, errText);
+          throw new Error('HTTP ' + res.status);
+        }
+
+        const data = await res.json();
+        return data.choices?.[0]?.message?.content || "I'm not sure how to respond — try rephrasing!";
+      } catch (e) {
+        console.error('AI call failed:', e);
+        return "Sorry, I'm having trouble responding right now. Error: " + e.message;
+      }
+    }
+
+    function addMessage(text, who) {
+      const div = document.createElement('div');
+      div.className = `msg ${who}`;
+      if (who === 'ai') {
+        div.innerHTML = `
+          <div class="sender">AI Coach <button class="add-sentence-btn" onclick="addSentenceFromChat(this)" title="Add to library">✚ Add</button></div>
+          <div class="ai-text">${text}</div>
+        `;
+        div.dataset.text = text;
+      } else {
+        div.innerHTML = `<div class="sender">You</div>${text}`;
+      }
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function addSentenceFromChat(btn) {
+      const msgDiv = btn.closest('.msg');
+      const text = msgDiv.dataset.text;
+      if (!text) {
+        showToast('Error: no text found');
+        return;
+      }
+
+      // Try multiple patterns to extract a clean English sentence
+      let sentenceText = '';
+      // Pattern 1: quoted text
+      const quoted = text.match(/[""]([^""]{5,100})[""]/);
+      // Pattern 2: sentences with common English patterns
+      const english = text.match(/(?:you can say|try this|sentence:?)\s*([A-Z][^.!?]{10,80}(?:[.!?]))/i);
+      // Pattern 3: standalone English sentence
+      const standalone = text.match(/^([A-Z][^.!?\n]{10,80}[.!?])\s*$/m);
+
+      if (quoted) sentenceText = quoted[1].trim();
+      else if (english) sentenceText = english[1].trim();
+      else if (standalone) sentenceText = standalone[1].trim();
+      else {
+        // Last resort: longest line that looks like English
+        const lines = text.split('\n');
+        for (const line of lines.reverse()) {
+          const trimmed = line.trim();
+          if (trimmed.length > 15 && /[A-Z][a-z]/.test(trimmed) && !/[\u4e00-\u9fff]/.test(trimmed)) {
+            sentenceText = trimmed;
+            break;
+          }
+        }
+      }
+
+      if (!sentenceText) {
+        showToast('Could not find a sentence to add');
+        return;
+      }
+
+      // Detect scene
+      let scene = 'Chat';
+      const lower = text.toLowerCase();
+      if (lower.includes('report')) scene = 'Report';
+      else if (lower.includes('meeting')) scene = 'Meeting';
+
+      const newSentence = {
+        id: Date.now(),
+        en: sentenceText,
+        cn: '',
+        scene: scene,
+        learned: false
+      };
+
+      state.sentences.push(newSentence);
+      saveState();
+      renderSentences();
+      showToast('✓ Added: ' + sentenceText.substring(0, 20) + '...');
+    }
+
+    async function handleSend() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      chatInput.value = '';
+
+      addMessage(text, 'user');
+
+      const wantsAdd = /加进去|添?加|add.*sentence/i.test(text);
+
+      const reply = await sendToAI(text);
+      addMessage(reply, 'ai');
+
+      // If user said "add", find the PREVIOUS AI message (not the acknowledgment)
+      if (wantsAdd) {
+        const allAiMsgs = chatMessages.querySelectorAll('.msg.ai');
+        if (allAiMsgs.length >= 2) {
+          // Second-to-last AI msg is the actual sentence, last is the ack
+          const prevAiMsg = allAiMsgs[allAiMsgs.length - 2];
+          const prevText = prevAiMsg.dataset.text;
+          if (prevText) {
+            // Use the same extraction logic as addSentenceFromChat
+            const quoted = prevText.match(/[""]([^""]{5,100})[""]/);
+            const english = prevText.match(/(?:you can say|try this|sentence:?)\s*([A-Z][^.!?]{10,80}(?:[.!?]))/i);
+            let sentenceText = quoted ? quoted[1].trim() : english ? english[1].trim() : prevText.trim();
+            if (sentenceText.length > 5) {
+              const lower = prevText.toLowerCase();
+              const scene = lower.includes('report') ? 'Report' : lower.includes('meeting') ? 'Meeting' : 'Chat';
+              state.sentences.push({ id: Date.now(), en: sentenceText, cn: '', scene, learned: false });
+              saveState();
+              renderSentences();
+              showToast('✓ Added: ' + sentenceText.substring(0, 25) + '...');
+            }
+          }
+        }
+      }
+    }
+
+    chatSend.onclick = handleSend;
+    chatInput.onkeydown = (e) => { if (e.key === 'Enter') handleSend(); };
+
+    // ── Toast ──────────────────────────────────────────────
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // ── Init ──────────────────────────────────────────────
+    // Key is hardcoded — no setup needed, just use it
+    try { renderSentences(); } catch (e) {}
+    try { renderCalendar(); } catch (e) {}
+  </script>
+</body>
+</html>
