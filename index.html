@@ -142,11 +142,9 @@
     }
 
     .sentence-card {
-      background: rgba(255,255,255,0.92);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-radius: var(--radius);
-      box-shadow: 0 4px 24px rgba(0,0,0,0.15), 0 1px 4px rgba(0,0,0,0.08);
       padding: 14px 16px;
       display: flex;
       align-items: center;
@@ -155,9 +153,24 @@
       cursor: grab;
       position: relative;
       overflow: visible;
-      color: #1a1a2e;
+      color: #fff;
       touch-action: pan-y;
       user-select: none;
+    }
+    .sentence-card.report   {
+      background: rgba(232,168,56,0.15);
+      border: 2px solid rgba(232,168,56,0.85);
+      box-shadow: 0 0 0 2px rgba(232,168,56,0.1), 0 4px 20px rgba(232,168,56,0.2), 0 1px 4px rgba(0,0,0,0.15);
+    }
+    .sentence-card.chat    {
+      background: rgba(56,200,176,0.15);
+      border: 2px solid rgba(56,200,176,0.85);
+      box-shadow: 0 0 0 2px rgba(56,200,176,0.1), 0 4px 20px rgba(56,200,176,0.2), 0 1px 4px rgba(0,0,0,0.15);
+    }
+    .sentence-card.meeting {
+      background: rgba(192,87,106,0.15);
+      border: 2px solid rgba(192,87,106,0.85);
+      box-shadow: 0 0 0 2px rgba(192,87,106,0.1), 0 4px 20px rgba(192,87,106,0.2), 0 1px 4px rgba(0,0,0,0.15);
     }
     .sentence-card.learned {
       opacity: 0;
@@ -195,7 +208,7 @@
       flex: 1;
       font-size: 15px;
       line-height: 1.5;
-      color: #1a1a2e;
+      color: rgba(255,255,255,0.95);
     }
     .sentence-card .icon-btn {
       width: 36px;
@@ -211,15 +224,15 @@
       flex-shrink: 0;
     }
     .icon-btn.speak {
-      background: rgba(232,168,56,0.12);
-      color: #e8a838;
+      background: rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.9);
     }
-    .icon-btn.speak:active { background: rgba(232,168,56,0.22); }
+    .icon-btn.speak:active { background: rgba(255,255,255,0.25); }
     .icon-btn.done {
-      background: rgba(56,200,176,0.12);
-      color: #38c8b0;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.8);
     }
-    .icon-btn.done:active { background: rgba(56,200,176,0.22); }
+    .icon-btn.done:active { background: rgba(255,255,255,0.2); }
 
     /* ── Calendar ── */
     .calendar-wrap {
