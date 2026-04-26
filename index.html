@@ -654,19 +654,30 @@
     -webkit-backdrop-filter: blur(12px);
   ">
     <div style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 8px;">🔑 MiniMax API Key</div>
-    <input id="key-input" type="password" placeholder="sk-cp-..." autocomplete="off" style="
-      width: 100%;
-      padding: 10px 14px;
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 10px;
-      background: rgba(255,255,255,0.1);
-      color: rgba(255,255,255,0.9);
-      font-size: 14px;
-      outline: none;
-      box-sizing: border-box;
-      margin-bottom: 8px;
-    ">
-    <div id="key-status" style="color: rgba(255,255,255,0.5); font-size: 11px; text-align: center;"></div>
+    <div style="display: flex; gap: 8px;">
+      <input id="key-input" type="password" placeholder="sk-cp-..." autocomplete="off" style="
+        flex: 1;
+        padding: 10px 14px;
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 10px;
+        background: rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.9);
+        font-size: 14px;
+        outline: none;
+        box-sizing: border-box;
+      ">
+      <button id="key-save-btn" onclick="doSaveKey()" style="
+        padding: 10px 16px;
+        background: rgba(91,106,240,0.7);
+        border: 1px solid rgba(91,106,240,0.5);
+        border-radius: 10px;
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+      ">Save</button>
+    </div>
+    <div id="key-status" style="color: rgba(255,255,255,0.5); font-size: 11px; margin-top: 6px; text-align: center;"></div>
   </div>
 
   <script>
@@ -1090,7 +1101,16 @@
       if (el) el.style.display = 'block';
     }
 
-    // Auto-save on typing (no button needed)
+    // Auto-save on typing + button
+    function doSaveKey() {
+      const key = document.getElementById('key-input').value.trim();
+      if (!key) return;
+      saveAPIKey(key);
+      document.getElementById('key-status').textContent = '✓ Saved!';
+      document.getElementById('key-status').style.color = 'rgba(16,185,129,0.8)';
+      setTimeout(hideKeySetup, 1000);
+    }
+
     document.getElementById('key-input').oninput = () => {
       const key = document.getElementById('key-input').value.trim();
       if (key.length > 5) {
@@ -1098,6 +1118,10 @@
         document.getElementById('key-status').textContent = '✓ Saved!';
         document.getElementById('key-status').style.color = 'rgba(16,185,129,0.8)';
       }
+    };
+
+    document.getElementById('key-input').onkeydown = (e) => {
+      if (e.key === 'Enter') doSaveKey();
     };
 
     // ── Chat ──────────────────────────────────────────────
