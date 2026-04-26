@@ -1031,59 +1031,12 @@
     chatBtn.onclick = () => chatPanel.classList.add('open');
     closeChat.onclick = () => chatPanel.classList.remove('open');
 
-    // ── API Key Setup ─────────────────────────────────────
-    const KEY_STORAGE = 'minimax_key';
+    // ── API Key ───────────────────────────────────────────
     const DEFAULT_KEY = 'sk-cp-V62MPBT_iXeyvWZ9XE-Cy0wlbdrO8KG_O_EcKel8Dt6thpsvHjDquXHNMOXxfjoc6W_A2L7RC0Gxi7lAiWUV2w2aGUKt4v1aOA8yBB0bT6cYo7TjM71WMtA';
 
     function getAPIKey() {
-      try {
-        const stored = localStorage.getItem(KEY_STORAGE);
-        return stored || DEFAULT_KEY;
-      } catch (e) {
-        return DEFAULT_KEY;
-      }
+      return DEFAULT_KEY;
     }
-
-    function saveAPIKey(key) {
-      try {
-        localStorage.setItem(KEY_STORAGE, key);
-      } catch (e) {
-        try { sessionStorage.setItem(KEY_STORAGE, key); } catch (e2) {}
-      }
-    }
-
-    function hideKeySetup() {
-      const el = document.getElementById('keysetup');
-      if (el) el.style.display = 'none';
-    }
-
-    function showKeySetup() {
-      const el = document.getElementById('keysetup');
-      if (el) el.style.display = 'block';
-    }
-
-    // Auto-save on typing + button
-    function doSaveKey() {
-      const key = document.getElementById('key-input').value.trim();
-      if (!key) return;
-      saveAPIKey(key);
-      document.getElementById('key-status').textContent = '✓ Saved!';
-      document.getElementById('key-status').style.color = 'rgba(16,185,129,0.8)';
-      setTimeout(hideKeySetup, 1000);
-    }
-
-    document.getElementById('key-input').oninput = () => {
-      const key = document.getElementById('key-input').value.trim();
-      if (key.length > 5) {
-        saveAPIKey(key);
-        document.getElementById('key-status').textContent = '✓ Saved!';
-        document.getElementById('key-status').style.color = 'rgba(16,185,129,0.8)';
-      }
-    };
-
-    document.getElementById('key-input').onkeydown = (e) => {
-      if (e.key === 'Enter') doSaveKey();
-    };
 
     // ── Chat ──────────────────────────────────────────────
     const chatBtn = document.getElementById('chat-btn');
@@ -1094,23 +1047,12 @@
     const chatMessages = document.getElementById('chat-messages');
 
     chatBtn.onclick = () => {
-      const key = getAPIKey();
-      if (!key) {
-        showKeySetup();
-        document.getElementById('key-input').focus();
-        return;
-      }
       chatPanel.classList.add('open');
     };
     closeChat.onclick = () => chatPanel.classList.remove('open');
 
     async function sendToAI(userText) {
-      let apiKey = getAPIKey();
-      if (!apiKey) {
-        showKeySetup();
-        document.getElementById('key-input').focus();
-        return "Please add your API key first 😊";
-      }
+      const apiKey = getAPIKey();
 
       const active = state.sentences.filter(s => !s.learned);
       const activeEn = active.map(s => s.en).join('\n');
