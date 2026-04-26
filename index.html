@@ -639,47 +639,6 @@
 
   <div id="toast"></div>
 
-  <!-- ── API Key Setup (always visible) ── -->
-  <div id="keysetup" style="
-    position: fixed;
-    bottom: 90px;
-    left: 16px;
-    right: 16px;
-    background: rgba(30,30,50,0.95);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 16px;
-    padding: 16px;
-    z-index: 300;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  ">
-    <div style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 8px;">🔑 MiniMax Key（已预置，直接点 Save 即可）</div>
-    <div style="display: flex; gap: 8px;">
-      <input id="key-input" type="password" value="sk-cp-V62MPBT_iXeyvWZ9XE-Cy0wlbdrO8KG_O_EcKel8Dt6thpsvHjDquXHNMOXxfjoc6W_A2L7RC0Gxi7lAiWUV2w2aGUKt4v1aOA8yBB0bT6cYo7TjM71WMtA" autocomplete="off" style="
-        flex: 1;
-        padding: 10px 14px;
-        border: 1px solid rgba(255,255,255,0.2);
-        border-radius: 10px;
-        background: rgba(255,255,255,0.1);
-        color: rgba(255,255,255,0.9);
-        font-size: 14px;
-        outline: none;
-        box-sizing: border-box;
-      ">
-      <button id="key-save-btn" onclick="doSaveKey()" style="
-        padding: 10px 16px;
-        background: rgba(91,106,240,0.7);
-        border: 1px solid rgba(91,106,240,0.5);
-        border-radius: 10px;
-        color: white;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-      ">Save</button>
-    </div>
-    <div id="key-status" style="color: rgba(255,255,255,0.5); font-size: 11px; margin-top: 6px; text-align: center;"></div>
-  </div>
-
   <script>
     // ── Data ──────────────────────────────────────────────
     const INITIAL_SENTENCES = [
@@ -1220,11 +1179,7 @@ Roleplay naturally as a native English-speaking colleague or manager. Respond to
     }
 
     // ── Init ──────────────────────────────────────────────
-    // Auto-save the pre-filled key on load
-    if (getAPIKey()) {
-      try { saveAPIKey(getAPIKey()); } catch(e) {}
-      setTimeout(hideKeySetup, 100);
-    }
+    // Key is hardcoded — no setup needed, just use it
     try { renderSentences(); } catch (e) {}
     try { renderCalendar(); } catch (e) {}
   </script>
