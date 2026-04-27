@@ -1269,9 +1269,10 @@ Roleplay naturally as a native English-speaking colleague or manager. Respond to
 
       const newSentence = {
         id: Date.now(),
+        type: 'language',
         en: sentenceText,
         cn: '',
-        scene: scene,
+        topic: scene,
         learned: false
       };
 
@@ -1308,7 +1309,7 @@ Roleplay naturally as a native English-speaking colleague or manager. Respond to
             if (sentenceText.length > 5) {
               const lower = prevText.toLowerCase();
               const scene = lower.includes('report') ? 'Report' : lower.includes('meeting') ? 'Meeting' : 'Chat';
-              state.sentences.push({ id: Date.now(), en: sentenceText, cn: '', scene, learned: false });
+              state.sentences.push({ id: Date.now(), type: 'language', en: sentenceText, cn: '', topic: scene, learned: false });
               saveState();
               renderSentences();
               showToast('✓ Added: ' + sentenceText.substring(0, 25) + '...');
