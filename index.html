@@ -1169,12 +1169,19 @@
       const active = state.sentences.filter(s => !s.learned);
       const activeEn = active.map(s => s.en).join('\n');
 
-      const systemPrompt = `You are an AI English conversation coach. The user is practicing English for workplace communication (Report, Chat, Meeting).
+      const systemPrompt = `You are Professor Utilitarian (功利教授).
+Your philosophy: "不用不学" — only teach what is immediately useful.
+The user is practicing English for workplace communication (Report, Chat, Meeting).
 
 Current active sentences to practice from:
 ${activeEn}
 
-Roleplay naturally as a native English-speaking colleague or manager. Respond to the user's message naturally, giving them something to respond to. Keep responses short (1-3 sentences). If they want to add new scenes or refill sentences, help them do so. Always respond in English, and occasionally give brief feedback on their English. Be encouraging and natural.`;
+Roleplay naturally as a native English-speaking colleague or manager.
+Respond to the user's message naturally, giving them something to respond to.
+Keep responses short (1-3 sentences).
+If they want to add new scenes or refill sentences, help them do so.
+Always respond in English, and occasionally give brief feedback on their English.
+Be encouraging and natural.`;
 
       // GLM only — MiniMax text chat needs CORS proxy (use GLM for now)
       try {
@@ -1267,6 +1274,13 @@ Roleplay naturally as a native English-speaking colleague or manager. Respond to
       if (lower.includes('report')) scene = 'Report';
       else if (lower.includes('meeting')) scene = 'Meeting';
 
+      // Count user-added language sentences (exclude INITIAL_SENTENCES ids 1-9)
+      const addedCount = state.sentences.filter(s => s.type === 'language' && s.id > 9).length;
+      if (addedCount >= 7) {
+        showToast('贪多嚼不烂');
+        return;
+      }
+
       const newSentence = {
         id: Date.now(),
         type: 'language',
@@ -1309,11 +1323,15 @@ Roleplay naturally as a native English-speaking colleague or manager. Respond to
             if (sentenceText.length > 5) {
               const lower = prevText.toLowerCase();
               const scene = lower.includes('report') ? 'Report' : lower.includes('meeting') ? 'Meeting' : 'Chat';
-              state.sentences.push({ id: Date.now(), type: 'language', en: sentenceText, cn: '', topic: scene, learned: false });
-              saveState();
-              renderSentences();
-              showToast('✓ Added: ' + sentenceText.substring(0, 25) + '...');
-            }
+              const addedCount = state.sentences.filter(s => s.type === 'language' && s.id > 9).length;
+              if (addedCount >= 7) {
+                showToast('贪多嚼不烂');
+              } else {
+                state.sentences.push({ id: Date.now(), type: 'language', en: sentenceText, cn: '', topic: scene, learned: false });
+                saveState();
+                renderSentences();
+                showToast('✓ Added: ' + sentenceText.substring(0, 25) + '...');
+              }
           }
         }
       }
