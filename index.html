@@ -701,7 +701,7 @@
     </div>
     <div id="chat-messages">
       <div class="msg ai">
-        <div class="sender">AI Coach</div>
+        <div class="sender">功利教授</div>
         Hi! Let's practice some English. I'll act as your colleague or manager — try responding naturally in English.
       </div>
     </div>
@@ -1213,7 +1213,7 @@ Roleplay naturally as a native English-speaking colleague or manager. Respond to
       div.className = `msg ${who}`;
       if (who === 'ai') {
         div.innerHTML = `
-          <div class="sender">AI Coach <button class="add-sentence-btn" onclick="addSentenceFromChat(this)" title="Add to library">✚ Add</button></div>
+          <div class="sender">功利教授 <button class="add-sentence-btn" onclick="addSentenceFromChat(this)" title="Add to library">✚ Add</button></div>
           <div class="ai-text">${text}</div>
         `;
         div.dataset.text = text;
