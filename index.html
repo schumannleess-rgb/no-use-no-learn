@@ -160,9 +160,9 @@
       flex-wrap: wrap;
     }
     #topic-filters .scene-tag-pill {
-      opacity: 0.5;
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.15s;
+      opacity: 0.45;
+      cursor: default;
+      transition: opacity 0.15s;
     }
     #topic-filters .scene-tag-pill:hover { opacity: 0.75; transform: scale(1.05); }
     #topic-filters .scene-tag-pill.active { opacity: 1; font-weight: 700; transform: scale(1.08); }
@@ -728,8 +728,22 @@
       { id: 9, type: 'language', en: "I'd lean toward shipping a simpler version first and iterating based on feedback.", cn: '', topic: "Meeting", learned: false },
     ];
 
-    let state = loadState();
-    state.activeFilter = state.activeFilter || 'All';
+    let state;
+    try {
+      state = loadState();
+      state.activeFilter = state.activeFilter || 'All';
+    } catch (e) {
+      state = {
+        sentences: INITIAL_SENTENCES.map(s => ({ ...s, learned: false })),
+        learned: [],
+        history: {},
+        currentMonth: new Date().getMonth(),
+        currentYear: new Date().getFullYear(),
+        calendarExpanded: false,
+        weekAnchor: null,
+        activeFilter: 'All'
+      };
+    }
 
     function loadState() {
       const saved = localStorage.getItem('lingo-state');
@@ -1351,8 +1365,8 @@ Be encouraging and natural.`;
 
     // ── Init ──────────────────────────────────────────────
     // Key is hardcoded — no setup needed, just use it
-    renderSentences();
-    renderCalendar();
+    try { renderSentences(); } catch(e) { console.error('renderSentences error:', e.message); }
+    try { renderCalendar(); } catch(e) { console.error('renderCalendar error:', e.message); }
 }
 </script>
 </body>
