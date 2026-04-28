@@ -1364,9 +1364,16 @@ Be encouraging and natural.`;
     }
 
     // ── Init ──────────────────────────────────────────────
-    // Key is hardcoded — no setup needed, just use it
-    renderSentences();
-    renderCalendar();
+    // Use DOMContentLoaded to ensure DOM is ready before rendering
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        renderSentences();
+        renderCalendar();
+      });
+    } else {
+      renderSentences();
+      renderCalendar();
+    }
 </script>
 </body>
 </html>
