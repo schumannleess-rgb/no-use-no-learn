@@ -1364,10 +1364,10 @@ Be encouraging and natural.`;
     }
 
     // ── Init ──────────────────────────────────────────────
-    requestAnimationFrame(() => {
+    window.onload = () => {
       renderSentences();
       renderCalendar();
-    });
-  }</script>
+    };
+</script>
 </body>
 </html>
