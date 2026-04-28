@@ -204,17 +204,17 @@
       touch-action: pan-y;
       user-select: none;
     }
-    .sentence-card.report   {
+    .sentence-card.topic-report  {
       background: rgba(232,168,56,0.15);
       border: 2px solid rgba(232,168,56,0.85);
       box-shadow: 0 0 0 2px rgba(232,168,56,0.1), 0 4px 20px rgba(232,168,56,0.2), 0 1px 4px rgba(0,0,0,0.15);
     }
-    .sentence-card.chat    {
+    .sentence-card.topic-chat    {
       background: rgba(56,200,176,0.15);
       border: 2px solid rgba(56,200,176,0.85);
       box-shadow: 0 0 0 2px rgba(56,200,176,0.1), 0 4px 20px rgba(56,200,176,0.2), 0 1px 4px rgba(0,0,0,0.15);
     }
-    .sentence-card.meeting {
+    .sentence-card.topic-meeting {
       background: rgba(192,87,106,0.15);
       border: 2px solid rgba(192,87,106,0.85);
       box-shadow: 0 0 0 2px rgba(192,87,106,0.1), 0 4px 20px rgba(192,87,106,0.2), 0 1px 4px rgba(0,0,0,0.15);
@@ -319,9 +319,9 @@
       transition: transform 0.15s;
       z-index: 2;
     }
-    .sentence-card.report .card-check   { border-color: rgba(232,168,56,0.7); color: rgba(232,168,56,0.9); }
-    .sentence-card.chat .card-check     { border-color: rgba(56,200,176,0.7); color: rgba(56,200,176,0.9); }
-    .sentence-card.meeting .card-check  { border-color: rgba(192,87,106,0.7); color: rgba(192,87,106,0.9); }
+    .sentence-card.topic-report .card-check  { border-color: rgba(232,168,56,0.7); color: rgba(232,168,56,0.9); }
+    .sentence-card.topic-chat .card-check    { border-color: rgba(56,200,176,0.7); color: rgba(56,200,176,0.9); }
+    .sentence-card.topic-meeting .card-check { border-color: rgba(192,87,106,0.7); color: rgba(192,87,106,0.9); }
     .sentence-card .card-check:hover { transform: scale(1.15); }
     .sentence-card .card-check:active { transform: scale(0.95); }
 
@@ -660,10 +660,10 @@
   <header>
     <div class="lang-badge">🇬🇧 English</div>
     <div class="subtitle" id="topic-filters">
-      <span class="scene-tag-pill report active" data-topic="All" onclick="filterByTopic('All')">● All</span>
-      <span class="scene-tag-pill report" data-topic="Report" onclick="filterByTopic('Report')">● Report</span>
-      <span class="scene-tag-pill chat" data-topic="Chat" onclick="filterByTopic('Chat')">● Chat</span>
-      <span class="scene-tag-pill meeting" data-topic="Meeting" onclick="filterByTopic('Meeting')">● Meeting</span>
+      <span class="scene-tag-pill report active" data-topic="All">● All</span>
+      <span class="scene-tag-pill report" data-topic="Report">● Report</span>
+      <span class="scene-tag-pill chat" data-topic="Chat">● Chat</span>
+      <span class="scene-tag-pill meeting" data-topic="Meeting">● Meeting</span>
     </div>
   </header>
 
@@ -701,7 +701,7 @@
     </div>
     <div id="chat-messages">
       <div class="msg ai">
-        <div class="sender">AI Coach</div>
+        <div class="sender">功利教授</div>
         Hi! Let's practice some English. I'll act as your colleague or manager — try responding naturally in English.
       </div>
     </div>
@@ -714,6 +714,7 @@
   <div id="toast"></div>
 
   <script>
+
     // ── Data ──────────────────────────────────────────────
     const INITIAL_SENTENCES = [
       { id: 1, type: 'language', en: "I'd flag that the numbers are trending in the right direction — but I want to flag a couple of caveats.", cn: '', topic: "Report", learned: false },
@@ -1169,12 +1170,19 @@
       const active = state.sentences.filter(s => !s.learned);
       const activeEn = active.map(s => s.en).join('\n');
 
-      const systemPrompt = `You are an AI English conversation coach. The user is practicing English for workplace communication (Report, Chat, Meeting).
+      const systemPrompt = `You are Professor Utilitarian (功利教授).
+Your philosophy: "不用不学" — only teach what is immediately useful.
+The user is practicing English for workplace communication (Report, Chat, Meeting).
 
 Current active sentences to practice from:
 ${activeEn}
 
-Roleplay naturally as a native English-speaking colleague or manager. Respond to the user's message naturally, giving them something to respond to. Keep responses short (1-3 sentences). If they want to add new scenes or refill sentences, help them do so. Always respond in English, and occasionally give brief feedback on their English. Be encouraging and natural.`;
+Roleplay naturally as a native English-speaking colleague or manager.
+Respond to the user's message naturally, giving them something to respond to.
+Keep responses short (1-3 sentences).
+If they want to add new scenes or refill sentences, help them do so.
+Always respond in English, and occasionally give brief feedback on their English.
+Be encouraging and natural.`;
 
       // GLM only — MiniMax text chat needs CORS proxy (use GLM for now)
       try {
@@ -1213,7 +1221,7 @@ Roleplay naturally as a native English-speaking colleague or manager. Respond to
       div.className = `msg ${who}`;
       if (who === 'ai') {
         div.innerHTML = `
-          <div class="sender">AI Coach <button class="add-sentence-btn" onclick="addSentenceFromChat(this)" title="Add to library">✚ Add</button></div>
+          <div class="sender">功利教授 <button class="add-sentence-btn" onclick="addSentenceFromChat(this)" title="Add to library">✚ Add</button></div>
           <div class="ai-text">${text}</div>
         `;
         div.dataset.text = text;
@@ -1267,11 +1275,19 @@ Roleplay naturally as a native English-speaking colleague or manager. Respond to
       if (lower.includes('report')) scene = 'Report';
       else if (lower.includes('meeting')) scene = 'Meeting';
 
+      // Count user-added language sentences (exclude INITIAL_SENTENCES ids 1-9)
+      const addedCount = state.sentences.filter(s => s.type === 'language' && s.id > 9).length;
+      if (addedCount >= 7) {
+        showToast('贪多嚼不烂');
+        return;
+      }
+
       const newSentence = {
         id: Date.now(),
+        type: 'language',
         en: sentenceText,
         cn: '',
-        scene: scene,
+        topic: scene,
         learned: false
       };
 
@@ -1308,11 +1324,15 @@ Roleplay naturally as a native English-speaking colleague or manager. Respond to
             if (sentenceText.length > 5) {
               const lower = prevText.toLowerCase();
               const scene = lower.includes('report') ? 'Report' : lower.includes('meeting') ? 'Meeting' : 'Chat';
-              state.sentences.push({ id: Date.now(), en: sentenceText, cn: '', scene, learned: false });
-              saveState();
-              renderSentences();
-              showToast('✓ Added: ' + sentenceText.substring(0, 25) + '...');
-            }
+              const addedCount = state.sentences.filter(s => s.type === 'language' && s.id > 9).length;
+              if (addedCount >= 7) {
+                showToast('贪多嚼不烂');
+              } else {
+                state.sentences.push({ id: Date.now(), type: 'language', en: sentenceText, cn: '', topic: scene, learned: false });
+                saveState();
+                renderSentences();
+                showToast('✓ Added: ' + sentenceText.substring(0, 25) + '...');
+              }
           }
         }
       }
@@ -1333,6 +1353,7 @@ Roleplay naturally as a native English-speaking colleague or manager. Respond to
     // Key is hardcoded — no setup needed, just use it
     try { renderSentences(); } catch (e) {}
     try { renderCalendar(); } catch (e) {}
-  </script>
+}
+</script>
 </body>
 </html>
