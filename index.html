@@ -1364,16 +1364,10 @@ Be encouraging and natural.`;
     }
 
     // ── Init ──────────────────────────────────────────────
-    // Use DOMContentLoaded to ensure DOM is ready before rendering
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        renderSentences();
-        renderCalendar();
-      });
-    } else {
+    requestAnimationFrame(() => {
       renderSentences();
       renderCalendar();
-    }
+    });
   }</script>
 </body>
 </html>
