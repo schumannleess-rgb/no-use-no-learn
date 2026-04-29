@@ -732,41 +732,45 @@
     state.activeFilter = state.activeFilter || 'All';
 
     function loadState() {
-      const saved = localStorage.getItem('lingo-state');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        // Rebuild language cards from IDs + full list
-        const learnedIds = parsed.learned || [];
-        const languageIds = new Set(INITIAL_SENTENCES.map(s => s.id));
-        const sentences = INITIAL_SENTENCES.map(s => ({
-          ...s,
-          learned: learnedIds.includes(s.id)
-        }));
-        // Migrate any existing custom sentences (might have old format)
-        if (parsed.sentences) {
-          for (const s of parsed.sentences) {
-            // Skip if it's one of our initial sentences (already added above)
-            if (languageIds.has(s.id)) continue;
-            // Migrate old format: scene → topic, add type
-            if (!s.type) {
-              s.type = s.type || (s.en ? 'language' : 'knowledge');
+      try {
+        const saved = localStorage.getItem('lingo-state');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          // Rebuild language cards from IDs + full list
+          const learnedIds = parsed.learned || [];
+          const languageIds = new Set(INITIAL_SENTENCES.map(s => s.id));
+          const sentences = INITIAL_SENTENCES.map(s => ({
+            ...s,
+            learned: learnedIds.includes(s.id)
+          }));
+          // Migrate any existing custom sentences (might have old format)
+          if (parsed.sentences) {
+            for (const s of parsed.sentences) {
+              // Skip if it's one of our initial sentences (already added above)
+              if (languageIds.has(s.id)) continue;
+              // Migrate old format: scene → topic, add type
+              if (!s.type) {
+                s.type = s.type || (s.en ? 'language' : 'knowledge');
+              }
+              if (!s.topic && s.scene) {
+                s.topic = s.scene;
+                delete s.scene;
+              }
+              sentences.push(s);
             }
-            if (!s.topic && s.scene) {
-              s.topic = s.scene;
-              delete s.scene;
-            }
-            sentences.push(s);
           }
+          return {
+            sentences,
+            learned: parsed.learned || [],
+            history: parsed.history || {},
+            currentMonth: new Date().getMonth(),
+            currentYear: new Date().getFullYear(),
+            calendarExpanded: parsed.calendarExpanded || false,
+            weekAnchor: parsed.weekAnchor || null
+          };
         }
-        return {
-          sentences,
-          learned: parsed.learned || [],
-          history: parsed.history || {},
-          currentMonth: new Date().getMonth(),
-          currentYear: new Date().getFullYear(),
-          calendarExpanded: parsed.calendarExpanded || false,
-          weekAnchor: parsed.weekAnchor || null
-        };
+      } catch(e) {
+        console.error('loadState failed, using fallback:', e.message);
       }
       return {
         sentences: INITIAL_SENTENCES.map(s => ({ ...s, learned: false })),
@@ -801,6 +805,10 @@
 
     // ── Render Sentences ──────────────────────────────────
     function renderSentences() {
+      if (!state) {
+        console.error('renderSentences: state is undefined, skipping');
+        return;
+      }
       const container = document.getElementById('sentence-list');
       const active = state.sentences.filter(s => !s.learned && (state.activeFilter === 'All' || s.topic === state.activeFilter));
 
