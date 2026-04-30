@@ -635,6 +635,100 @@
       margin-top: 12px;
       cursor: pointer;
     }
+
+    /* ── API Key Modal ── */
+    .key-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+    .key-modal-overlay.hidden { display: none; }
+    .key-modal-box {
+      background: rgba(30,25,40,0.95);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 32px 28px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .key-modal-icon { font-size: 48px; margin-bottom: 12px; }
+    .key-modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.95);
+      margin-bottom: 10px;
+    }
+    .key-modal-desc {
+      font-size: 14px;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    .key-modal-hint {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 20px;
+    }
+    .key-modal-hint a {
+      color: #7c8aff;
+      text-decoration: none;
+    }
+    .key-modal-hint a:hover { text-decoration: underline; }
+    .key-input {
+      width: 100%;
+      box-sizing: border-box;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.9);
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 8px;
+    }
+    .key-input:focus { border-color: rgba(91,106,240,0.8); }
+    .key-input::placeholder { color: rgba(255,255,255,0.35); }
+    .key-input-error {
+      font-size: 12px;
+      color: #ef4444;
+      min-height: 16px;
+      margin-bottom: 4px;
+    }
+    .key-save-btn {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .key-save-btn:hover { background: #6b7af0; }
+    .key-save-btn:active { transform: scale(0.98); }
+    .key-modal-footer {
+      margin-top: 16px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .key-remember { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .key-remember input { cursor: pointer; }
   </style>
 </head>
 <body>
@@ -712,6 +806,36 @@
   </div>
 
   <div id="toast"></div>
+
+  <!-- ══ API Key Setup Modal ══ -->
+  <div id="key-modal" class="key-modal-overlay">
+    <div class="key-modal-box">
+      <div class="key-modal-icon">🔑</div>
+      <h2 class="key-modal-title">设置你的 GLM API Key</h2>
+      <p class="key-modal-desc">
+        输入你的 GLM Key，免费额度足够测试用。<br>
+        Key 只保存在你自己的浏览器里，不会上传。
+      </p>
+      <div class="key-modal-hint">
+        👉 去 <a href="https://bigmodel.cn" target="_blank">bigmodel.cn</a> 注册后，在控制台获取 Key
+      </div>
+      <input
+        id="api-key-input"
+        class="key-input"
+        type="password"
+        placeholder="粘贴你的 GLM Key..."
+        autocomplete="off"
+      />
+      <div class="key-input-error" id="key-input-error"></div>
+      <button class="key-save-btn" id="key-save-btn">💾 保存并开始</button>
+      <div class="key-modal-footer">
+        <label class="key-remember">
+          <input type="checkbox" id="key-remember" checked>
+          记住我（下次自动加载）
+        </label>
+      </div>
+    </div>
+  </div>
 
   <script>
 
@@ -1157,9 +1281,24 @@
       renderCalendar();
     };
 
-    // ── API Keys ─────────────────────────────────────────
-    const ***REMOVED***;
-    const ***REMOVED***;
+    // ── API Key Management ─────────────────────────────────
+    const KEY_STORAGE = 'lingo-glm-key';
+    const REMEMBER_STORAGE = 'lingo-glm-remember';
+
+    function getStoredKey() {
+      return localStorage.getItem(KEY_STORAGE);
+    }
+    function saveKey(key, remember) {
+      if (remember) {
+        localStorage.setItem(KEY_STORAGE, key);
+      } else {
+        sessionStorage.setItem(KEY_STORAGE, key);
+      }
+      localStorage.setItem(REMEMBER_STORAGE, remember ? '1' : '0');
+    }
+    function shouldRemember() {
+      return localStorage.getItem(REMEMBER_STORAGE) !== '0';
+    }
 
     // ── Chat ──────────────────────────────────────────────
     const chatBtn = document.getElementById('chat-btn');
@@ -1192,6 +1331,11 @@ If they want to add new scenes or refill sentences, help them do so.
 Always respond in English, and occasionally give brief feedback on their English.
 Be encouraging and natural.`;
 
+      const GLM_KEY = getStoredKey();
+      if (!GLM_KEY) {
+        throw new Error('NO_KEY');
+      }
+
       // GLM only — MiniMax text chat needs CORS proxy (use GLM for now)
       try {
         const res = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
@@ -1220,6 +1364,10 @@ Be encouraging and natural.`;
         return data.choices?.[0]?.message?.content || "I'm not sure how to respond — try rephrasing!";
       } catch (e) {
         console.error('AI call failed:', e);
+        if (e.message === 'NO_KEY') {
+          showKeyModal(true);
+          return "Please set your GLM API Key first 😊";
+        }
         return "Sorry, I'm having trouble responding right now. Error: " + e.message;
       }
     }
@@ -1349,6 +1497,56 @@ Be encouraging and natural.`;
     chatSend.onclick = handleSend;
     chatInput.onkeydown = (e) => { if (e.key === 'Enter') handleSend(); };
 
+    // ── API Key Modal ─────────────────────────────────────
+    function showKeyModal(forced) {
+      const modal = document.getElementById('key-modal');
+      const input = document.getElementById('api-key-input');
+      const errorEl = document.getElementById('key-input-error');
+      const rememberCb = document.getElementById('key-remember');
+
+      if (forced) {
+        // show error from failed sendToAI
+        errorEl.textContent = '需要先设置 API Key 才能使用聊天功能';
+      }
+
+      rememberCb.checked = shouldRemember();
+
+      modal.classList.remove('hidden');
+      input.value = '';
+      input.focus();
+    }
+
+    function hideKeyModal() {
+      document.getElementById('key-modal').classList.add('hidden');
+    }
+
+    function handleKeySave() {
+      const input = document.getElementById('api-key-input');
+      const errorEl = document.getElementById('key-input-error');
+      const key = input.value.trim();
+      const remember = document.getElementById('key-remember').checked;
+
+      if (!key) {
+        errorEl.textContent = 'Key 不能为空';
+        return;
+      }
+      if (key.length < 10) {
+        errorEl.textContent = 'Key 格式不对，请检查后重新粘贴';
+        return;
+      }
+
+      errorEl.textContent = '';
+      saveKey(key, remember);
+      localStorage.setItem(REMEMBER_STORAGE, remember ? '1' : '0');
+      hideKeyModal();
+      showToast('Key 已保存 ✓');
+    }
+
+    document.getElementById('key-save-btn').onclick = handleKeySave;
+    document.getElementById('api-key-input').onkeydown = (e) => {
+      if (e.key === 'Enter') handleKeySave();
+    };
+
     // ── Toast ──────────────────────────────────────────────
     function showToast(msg) {
       const toast = document.getElementById('toast');
@@ -1358,8 +1556,15 @@ Be encouraging and natural.`;
     }
 
     // ── Init ──────────────────────────────────────────────
-    // Key is hardcoded — no setup needed, just use it
     window.addEventListener('load', () => {
+      // If we already have a stored key, hide modal immediately and init
+      if (getStoredKey()) {
+        // already has key, proceed normally
+      } else {
+        // No key — show modal, but still let user browse cards
+        showKeyModal(false);
+      }
+
       try {
         renderSentences();
       } catch(e) {
