@@ -833,7 +833,7 @@
         autocomplete="off"
       />
       <div class="key-input-error" id="key-input-error"></div>
-      <button class="key-save-btn" id="key-save-btn">💾 保存并开始</button>
+      <button class="key-save-btn" id="key-save-btn" onclick="var _s=false;function _t(e){if(_s)return;_s=true;var i=document.getElementById('api-key-input');if(i&&i.tagName==='INPUT')i.blur();var k=i.value.trim();var r=document.getElementById('key-remember').checked;if(!k){document.getElementById('key-input-error').textContent='Key 不能为空';_s=false;return;}if(k.length<10){document.getElementById('key-input-error').textContent='Key 格式不对，请检查后重新粘贴';_s=false;return;}document.getElementById('key-input-error').textContent='';var REM='lingo-glm-remember',KEY='lingo-glm-key';function _ss(a,b){try{localStorage.setItem(a,b)}catch(e){}};if(r)_ss(KEY,k);else _ss('lingo-glm-key-session',k);_ss(REM,r?'1':'0');document.getElementById('key-modal').classList.add('hidden');var t=document.getElementById('toast');t.textContent='Key 已保存 ✓';t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2000);setTimeout(function(){_s=false},400);}_t(event);">💾 保存并开始</button>
       <div class="key-modal-footer">
         <label class="key-remember">
           <input type="checkbox" id="key-remember" checked>
@@ -1563,23 +1563,18 @@ Be encouraging and natural.`;
     var _saveLocked = false;
 
     function _triggerSave(e) {
-      if (_saveLocked) {
-        console.log('[KEY] blocked by lock, event type:', e.type);
-        return;
-      }
-      console.log('[KEY] _triggerSave called, event type:', e.type);
+      if (_saveLocked) return;
       _saveLocked = true;
 
       // Dismiss iOS keyboard before processing
       if (document.activeElement && document.activeElement.tagName === 'INPUT') {
-        console.log('[KEY] dismissing keyboard');
         document.activeElement.blur();
       }
 
       window._handleKeySave();
 
       // Release lock after a short delay (prevents touchend→click double-fire)
-      setTimeout(function() { _saveLocked = false; console.log('[KEY] lock released'); }, 400);
+      setTimeout(function() { _saveLocked = false; }, 400);
     }
 
     saveBtn.addEventListener('touchend', function(e) {
@@ -1590,6 +1585,11 @@ Be encouraging and natural.`;
     saveBtn.addEventListener('click', function(e) {
       _triggerSave(e);
     });
+
+    // Fallback: direct onclick for environments where addEventListener fails
+    saveBtn.onclick = function(e) {
+      _triggerSave(e);
+    };
 
     document.getElementById('api-key-input').onkeydown = (e) => {
       if (e.key === 'Enter') {
