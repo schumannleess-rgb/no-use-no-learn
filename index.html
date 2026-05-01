@@ -1563,18 +1563,23 @@ Be encouraging and natural.`;
     var _saveLocked = false;
 
     function _triggerSave(e) {
-      if (_saveLocked) return;
+      if (_saveLocked) {
+        console.log('[KEY] blocked by lock, event type:', e.type);
+        return;
+      }
+      console.log('[KEY] _triggerSave called, event type:', e.type);
       _saveLocked = true;
 
       // Dismiss iOS keyboard before processing
       if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+        console.log('[KEY] dismissing keyboard');
         document.activeElement.blur();
       }
 
       window._handleKeySave();
 
       // Release lock after a short delay (prevents touchend→click double-fire)
-      setTimeout(function() { _saveLocked = false; }, 400);
+      setTimeout(function() { _saveLocked = false; console.log('[KEY] lock released'); }, 400);
     }
 
     saveBtn.addEventListener('touchend', function(e) {
