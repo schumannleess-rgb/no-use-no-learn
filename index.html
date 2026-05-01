@@ -1538,10 +1538,10 @@ Be encouraging and natural.`;
 
     window._handleKeySave = function() {
       console.log('[KEY] save button pressed');
-      const input = document.getElementById('api-key-input');
-      const errorEl = document.getElementById('key-input-error');
-      const key = input.value.trim();
-      const remember = document.getElementById('key-remember').checked;
+      var input = document.getElementById('api-key-input');
+      var errorEl = document.getElementById('key-input-error');
+      var key = input.value.trim();
+      var remember = document.getElementById('key-remember').checked;
 
       if (!key) {
         errorEl.textContent = 'Key 不能为空';
@@ -1560,14 +1560,37 @@ Be encouraging and natural.`;
     };
 
     var saveBtn = document.getElementById('key-save-btn');
-    saveBtn.addEventListener('click', window._handleKeySave, { passive: false });
+    var _saveLocked = false;
+
+    function _triggerSave(e) {
+      if (_saveLocked) return;
+      _saveLocked = true;
+
+      // Dismiss iOS keyboard before processing
+      if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+        document.activeElement.blur();
+      }
+
+      window._handleKeySave();
+
+      // Release lock after a short delay (prevents touchend→click double-fire)
+      setTimeout(function() { _saveLocked = false; }, 400);
+    }
+
     saveBtn.addEventListener('touchend', function(e) {
       e.preventDefault();
-      window._handleKeySave();
+      _triggerSave(e);
     }, { passive: false });
 
+    saveBtn.addEventListener('click', function(e) {
+      _triggerSave(e);
+    });
+
     document.getElementById('api-key-input').onkeydown = (e) => {
-      if (e.key === 'Enter') window._handleKeySave();
+      if (e.key === 'Enter') {
+        e.preventDefault(); // Prevent any default behavior (e.g., form submit)
+        _triggerSave(e);
+      }
     };
 
     // ── Toast ──────────────────────────────────────────────

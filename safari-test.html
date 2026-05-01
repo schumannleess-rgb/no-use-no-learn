@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Safari 诊断测试工具 — Lingo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: white;
+      min-height: 100vh;
+      padding: 20px 16px 60px;
+    }
+    .card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 20px;
+      max-width: 440px;
+      margin: 0 auto 16px;
+    }
+    h1 { font-size: 20px; margin-bottom: 6px; }
+    .subtitle { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 16px; }
+    h2 {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+      margin-top: 16px;
+    }
+    h2:first-of-type { margin-top: 0; }
+
+    .result {
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 8px;
+      font-family: monospace;
+      word-break: break-all;
+    }
+    .result.pass { background: rgba(16,185,129,0.18); border: 1px solid rgba(16,185,129,0.4); color: #10b981; }
+    .result.fail { background: rgba(239,68,68,0.18); border: 1px solid rgba(239,68,68,0.4); color: #ef4444; }
+    .result.warn { background: rgba(245,158,11,0.18); border: 1px solid rgba(245,158,11,0.4); color: #f59e0b; }
+    .result.info { background: rgba(91,106,240,0.12); border: 1px solid rgba(91,106,240,0.3); color: #8b9aff; }
+
+    /* ── Test Buttons ── */
+    .test-btn {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 8px;
+      -webkit-appearance: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .test-btn.a { background: #5b6af0; color: white; }
+    .test-btn.b { background: #38c8b0; color: white; }
+    .test-btn.c { background: #c0576a; color: white; }
+    .test-btn.d { background: #e8a838; color: #1a1a2e; }
+
+    /* ── Test Input ── */
+    .test-input {
+      width: 100%;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 15px;
+      color: white;
+      outline: none;
+      -webkit-appearance: none;
+      -webkit-tap-highlight-color: transparent;
+      margin-bottom: 8px;
+    }
+    .test-input:focus { border-color: rgba(91,106,240,0.8); }
+    .test-input::placeholder { color: rgba(255,255,255,0.3); }
+
+    /* ── Log ── */
+    .log-area {
+      background: rgba(0,0,0,0.4);
+      border-radius: 12px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #aaa;
+      max-height: 220px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+    .log-line { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 2px 0; }
+    .log-line.ok { color: #10b981; }
+    .log-line.err { color: #ef4444; }
+    .log-line.warn { color: #f59e0b; }
+
+    .label-row {
+      font-size: 12px;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 4px;
+      margin-top: 8px;
+    }
+
+    /* ── Score Banner ── */
+    .score-banner {
+      text-align: center;
+      padding: 16px;
+      border-radius: 16px;
+      margin-bottom: 16px;
+    }
+    .score-banner.good { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); }
+    .score-banner.bad  { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); }
+    .score-num { font-size: 48px; font-weight: 800; }
+    .score-banner.good .score-num { color: #10b981; }
+    .score-banner.bad  .score-num { color: #ef4444; }
+
+    .clear-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      color: rgba(255,255,255,0.5);
+      padding: 6px 12px;
+      font-size: 11px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .app-link {
+      display: block;
+      width: 100%;
+      background: #5b6af0;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>🔍 Safari 诊断测试</h1>
+  <div class="subtitle">Lingo App — iOS Safari 兼容性验证</div>
+  <div id="score-banner" class="score-banner good">
+    <div class="score-num" id="score">--</div>
+    <div id="score-label" style="font-size:13px;">运行中...</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>一、环境检测</h2>
+  <div id="env-results"></div>
+</div>
+
+<div class="card">
+  <h2>二、localStorage 读写测试</h2>
+  <div id="storage-results"></div>
+  <button class="clear-btn" onclick="clearStorage()">清除测试数据</button>
+</div>
+
+<div class="card">
+  <h2>三、按钮触发机制测试</h2>
+  <div class="label-row">按钮A — 纯 onclick 属性</div>
+  <button class="test-btn a" id="btn-onclick" onclick="recordTap('onclick-attr', 'click')">点我 (onclick)</button>
+
+  <div class="label-row">按钮B — addEventListener('click')</div>
+  <button class="test-btn b" id="btn-click">点我 (addEventListener click)</button>
+
+  <div class="label-row">按钮C — addEventListener('touchend')</div>
+  <button class="test-btn c" id="btn-touchend">点我 (touchend only)</button>
+
+  <div class="label-row">按钮D — click + touchend 组合（模拟 app save 按钮）</div>
+  <button class="test-btn d" id="btn-combo">点我 (click + touchend)</button>
+  <div id="combo-result" class="result info" style="margin-top:6px;">等待点击...</div>
+</div>
+
+<div class="card">
+  <h2>四、键盘场景模拟测试</h2>
+  <p style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:10px;">
+    模拟真实场景：先在密码框输入，再点保存按钮（等同于 app 的 Key 设置流程）
+  </p>
+  <input class="test-input" id="sim-input" type="password" placeholder="粘贴你的 Key（≥10字符）..." autocomplete="off">
+  <div id="sim-error" style="font-size:11px;color:#ef4444;min-height:16px;margin-bottom:4px;"></div>
+  <button class="test-btn a" id="sim-save-btn">💾 模拟保存</button>
+  <div id="sim-result" class="result info" style="margin-top:6px;">等待操作...</div>
+</div>
+
+<div class="card">
+  <h2>五、事件日志</h2>
+  <div class="log-area" id="log-area">
+    <div class="log-line">等待操作...</div>
+  </div>
+  <button class="clear-btn" onclick="clearLog()">清空日志</button>
+</div>
+
+<div class="card" style="text-align:center;">
+  <p style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:12px;">
+    诊断完成后，点击下方按钮测试实际 App
+  </p>
+  <a class="app-link" href="/index.html">→ 打开 Lingo App 测试</a>
+</div>
+
+<script>
+  // ═══════════════════════════════════════════════════════
+  //  LOGGING
+  // ═══════════════════════════════════════════════════════
+  var totalTests = 0;
+  var passedTests = 0;
+
+  function log(msg, type) {
+    type = type || 'ok';
+    var area = document.getElementById('log-area');
+    var line = document.createElement('div');
+    line.className = 'log-line ' + type;
+    var t = new Date().toLocaleTimeString();
+    line.textContent = '[' + t + '] ' + msg;
+    area.appendChild(line);
+    area.scrollTop = area.scrollHeight;
+    console.log('[SAFARI-TEST] ' + msg);
+  }
+
+  function clearLog() {
+    document.getElementById('log-area').innerHTML = '<div class="log-line">日志已清空</div>';
+  }
+
+  function setScore(pass, total) {
+    var pct = total > 0 ? Math.round(pass / total * 100) : 0;
+    document.getElementById('score').textContent = pct + '%';
+    var banner = document.getElementById('score-banner');
+    var label = document.getElementById('score-label');
+    if (pct >= 80) {
+      banner.className = 'score-banner good';
+      label.textContent = '通过 — 可以部署';
+    } else if (pct >= 50) {
+      banner.className = 'score-banner bad';
+      label.textContent = '有问题需修复';
+    } else {
+      banner.className = 'score-banner bad';
+      label.textContent = '严重问题，需要排查';
+    }
+  }
+
+  function addResult(containerId, passed, text) {
+    totalTests++;
+    if (passed) passedTests++;
+    setScore(passedTests, totalTests);
+    var cls = passed ? 'pass' : 'fail';
+    var prefix = passed ? '✓ ' : '✗ ';
+    var el = document.getElementById(containerId);
+    el.innerHTML += '<div class="result ' + cls + '">' + prefix + text + '</div>';
+    log(text, passed ? 'ok' : 'err');
+  }
+
+  // ═══════════════════════════════════════════════════════
+  //  一、环境检测
+  // ═══════════════════════════════════════════════════════
+  (function() {
+    var c = 'env-results';
+    var ua = navigator.userAgent;
+    var isIOS = /iPhone|iPad|iPod/.test(ua);
+    var isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|OPiOS|mercury/.test(ua);
+
+    addResult(c, true, 'UA: ' + ua.substring(0, 70));
+    addResult(c, 'ontouchstart' in window, 'Touch API: ' + ('ontouchstart' in window));
+    addResult(c, navigator.maxTouchPoints > 0, 'maxTouchPoints: ' + navigator.maxTouchPoints);
+    addResult(c, true, 'Platform: ' + (isIOS ? 'iOS' : isSafari ? 'Safari Desktop' : 'Other') + ' | ' + navigator.platform);
+    addResult(c, true, 'Viewport: ' + window.innerWidth + 'x' + window.innerHeight + ' | DPR: ' + window.devicePixelRatio);
+    addResult(c, typeof Promise !== 'undefined', 'Promise API: ' + (typeof Promise !== 'undefined' ? 'available' : 'missing'));
+    addResult(c, typeof fetch !== 'undefined', 'Fetch API: ' + (typeof fetch !== 'undefined' ? 'available' : 'missing'));
+  })();
+
+  // ═══════════════════════════════════════════════════════
+  //  二、localStorage 测试
+  // ═══════════════════════════════════════════════════════
+  (function() {
+    var c = 'storage-results';
+    var testKey = '__safari_test__';
+    var testVal = 'hello-' + Date.now();
+
+    try {
+      localStorage.setItem(testKey, testVal);
+      var readBack = localStorage.getItem(testKey);
+      if (readBack === testVal) {
+        addResult(c, true, 'localStorage 写入+读取 正常');
+      } else {
+        addResult(c, false, 'localStorage 读取出错: 期望"' + testVal + '" 实际"' + readBack + '"');
+      }
+      localStorage.removeItem(testKey);
+      var afterRemove = localStorage.getItem(testKey);
+      addResult(c, afterRemove === null, 'localStorage 删除 正常');
+    } catch(e) {
+      addResult(c, false, 'localStorage 不可用: ' + e.message);
+      log('localStorage error: ' + e.message, 'err');
+    }
+
+    // Test sessionStorage
+    try {
+      sessionStorage.setItem(testKey, testVal);
+      var sr = sessionStorage.getItem(testKey);
+      sessionStorage.removeItem(testKey);
+      addResult(c, sr === testVal, 'sessionStorage 正常');
+    } catch(e) {
+      addResult(c, false, 'sessionStorage 不可用: ' + e.message);
+    }
+  })();
+
+  // ═══════════════════════════════════════════════════════
+  //  三、按钮触发测试
+  // ═══════════════════════════════════════════════════════
+
+  // 按钮A — onclick 属性（在HTML中定义）
+  function recordTap(btn, evtType) {
+    log('按钮A onclick触发 — 事件类型: ' + evtType);
+    if (!window._btnASeen) {
+      window._btnASeen = true;
+      addResult('env-results', true, 'onclick 属性按钮 可触发');
+    }
+  }
+
+  // 按钮B — addEventListener click
+  document.getElementById('btn-click').addEventListener('click', function() {
+    log('按钮B click 触发');
+    if (!window._btnBSeen) {
+      window._btnBSeen = true;
+      addResult('env-results', true, 'addEventListener click 按钮 可触发');
+    }
+  });
+
+  // 按钮C — touchend only
+  document.getElementById('btn-touchend').addEventListener('touchend', function(e) {
+    e.preventDefault();
+    log('按钮C touchend 触发 (preventDefault called)');
+    if (!window._btnCSeen) {
+      window._btnCSeen = true;
+      addResult('env-results', true, 'touchend 按钮 可触发');
+    }
+  }, { passive: false });
+
+  // 按钮D — click + touchend 组合（复现 app save 按钮逻辑）
+  var btnCombo = document.getElementById('btn-combo');
+  var comboResult = document.getElementById('combo-result');
+  var comboFireCount = 0;
+  var comboTouchFired = false;
+  var comboClickFired = false;
+
+  btnCombo.addEventListener('touchend', function(e) {
+    e.preventDefault();
+    comboTouchFired = true;
+    comboFireCount++;
+    log('按钮D touchend 触发 (#' + comboFireCount + ')');
+    updateComboResult();
+  }, { passive: false });
+
+  btnCombo.addEventListener('click', function() {
+    comboClickFired = true;
+    comboFireCount++;
+    log('按钮D click 触发 (#' + comboFireCount + ')');
+    updateComboResult();
+  });
+
+  function updateComboResult() {
+    if (comboFireCount === 0) {
+      comboResult.textContent = '等待点击...';
+      comboResult.className = 'result info';
+    } else if (comboFireCount === 1) {
+      comboResult.textContent = '✓ 触发' + comboFireCount + '次 (正常) — touchend:' + comboTouchFired + ' click:' + comboClickFired;
+      comboResult.className = 'result pass';
+      if (!window._comboResulted) {
+        window._comboResulted = true;
+        addResult('env-results', true, 'click+touchend 组合 正常（触发1次）');
+      }
+    } else {
+      comboResult.textContent = '⚠ 触发' + comboFireCount + '次 (双击风险!) — touchend:' + comboTouchFired + ' click:' + comboClickFired;
+      comboResult.className = 'result fail';
+      if (!window._comboResulted) {
+        window._comboResulted = true;
+        addResult('env-results', false, 'click+touchend 组合 DOUBLE-FIRE (' + comboFireCount + '次触发)');
+      }
+    }
+  }
+
+  // Reset combo after a delay
+  btnCombo.addEventListener('pointerdown', function() {
+    // Reset counters for new tap
+    setTimeout(function() {
+      comboTouchFired = false;
+      comboClickFired = false;
+      comboFireCount = 0;
+    }, 100);
+  });
+
+  // Since pointerdown might not fire on all iOS, also reset on touchstart
+  btnCombo.addEventListener('touchstart', function() {
+    comboTouchFired = false;
+    comboClickFired = false;
+    comboFireCount = 0;
+  }, { passive: true });
+
+  // ═══════════════════════════════════════════════════════
+  //  四、键盘场景模拟（复现 Key 保存流程）
+  // ═══════════════════════════════════════════════════════
+  var simSaveBtn = document.getElementById('sim-save-btn');
+  var simInput = document.getElementById('sim-input');
+  var simError = document.getElementById('sim-error');
+  var simResult = document.getElementById('sim-result');
+  var simLocked = false;
+
+  function handleSimSave() {
+    if (simLocked) {
+      log('⚠ 模拟保存 被锁（双击防护生效）', 'warn');
+      return;
+    }
+    simLocked = true;
+
+    // Dismiss keyboard
+    if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+      document.activeElement.blur();
+    }
+
+    var key = simInput.value.trim();
+
+    if (!key) {
+      simError.textContent = 'Key 不能为空';
+      simResult.textContent = '✗ 校验失败：空值';
+      simResult.className = 'result fail';
+      log('模拟保存失败：Key 为空', 'err');
+      simLocked = false;
+      return;
+    }
+    if (key.length < 10) {
+      simError.textContent = 'Key 格式不对（需≥10字符）';
+      simResult.textContent = '✗ 校验失败：长度不足(' + key.length + '字符)';
+      simResult.className = 'result fail';
+      log('模拟保存失败：Key 长度' + key.length + '<10', 'err');
+      simLocked = false;
+      return;
+    }
+
+    simError.textContent = '';
+    simResult.textContent = '✓ 保存成功！Key 长度=' + key.length + ' | 触发正常';
+    simResult.className = 'result pass';
+    log('模拟保存成功！' + key.length + '字符', 'ok');
+
+    if (!window._simSaveReported) {
+      window._simSaveReported = true;
+      addResult('storage-results', true, '键盘场景模拟保存 通过');
+    }
+
+    setTimeout(function() { simLocked = false; }, 500);
+  }
+
+  // Use the same pattern as the fixed index.html
+  simSaveBtn.addEventListener('touchend', function(e) {
+    e.preventDefault();
+    log('模拟按钮 touchend');
+    handleSimSave();
+  }, { passive: false });
+
+  simSaveBtn.addEventListener('click', function() {
+    log('模拟按钮 click');
+    handleSimSave();
+  });
+
+  // Enter key
+  simInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      log('模拟输入框 Enter');
+      handleSimSave();
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════
+  //  Utility
+  // ═══════════════════════════════════════════════════════
+  function clearStorage() {
+    localStorage.removeItem('__safari_test__');
+    sessionStorage.removeItem('__safari_test__');
+    log('测试数据已清除');
+  }
+
+  // Final summary after a short delay
+  setTimeout(function() {
+    log('=== 诊断完成 ' + passedTests + '/' + totalTests + ' 通过 ===');
+  }, 500);
+</script>
+</body>
+</html>
