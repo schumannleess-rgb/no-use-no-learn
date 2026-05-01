@@ -827,7 +827,7 @@
         autocomplete="off"
       />
       <div class="key-input-error" id="key-input-error"></div>
-      <button class="key-save-btn" id="key-save-btn">💾 保存并开始</button>
+      <button class="key-save-btn" id="key-save-btn" onclick="window._handleKeySave()">💾 保存并开始</button>
       <div class="key-modal-footer">
         <label class="key-remember">
           <input type="checkbox" id="key-remember" checked>
@@ -1285,19 +1285,29 @@
     const KEY_STORAGE = 'lingo-glm-key';
     const REMEMBER_STORAGE = 'lingo-glm-remember';
 
+    function safeStorageGet(key) {
+      try { return localStorage.getItem(key); } catch(e) { return null; }
+    }
+    function safeStorageSet(key, val) {
+      try { localStorage.setItem(key, val); } catch(e) { /* Safari private mode */ }
+    }
+    function safeStorageRemove(key) {
+      try { localStorage.removeItem(key); } catch(e) { /* Safari private mode */ }
+    }
+
     function getStoredKey() {
-      return localStorage.getItem(KEY_STORAGE);
+      return safeStorageGet(KEY_STORAGE) || safeStorageGet('lingo-glm-key-session');
     }
     function saveKey(key, remember) {
       if (remember) {
-        localStorage.setItem(KEY_STORAGE, key);
+        safeStorageSet(KEY_STORAGE, key);
       } else {
-        sessionStorage.setItem(KEY_STORAGE, key);
+        safeStorageSet('lingo-glm-key-session', key);
       }
-      localStorage.setItem(REMEMBER_STORAGE, remember ? '1' : '0');
+      safeStorageSet(REMEMBER_STORAGE, remember ? '1' : '0');
     }
     function shouldRemember() {
-      return localStorage.getItem(REMEMBER_STORAGE) !== '0';
+      return safeStorageGet(REMEMBER_STORAGE) !== '0';
     }
 
     // ── Chat ──────────────────────────────────────────────
@@ -1520,7 +1530,7 @@ Be encouraging and natural.`;
       document.getElementById('key-modal').classList.add('hidden');
     }
 
-    function handleKeySave() {
+    window._handleKeySave = function() {
       const input = document.getElementById('api-key-input');
       const errorEl = document.getElementById('key-input-error');
       const key = input.value.trim();
@@ -1537,14 +1547,13 @@ Be encouraging and natural.`;
 
       errorEl.textContent = '';
       saveKey(key, remember);
-      localStorage.setItem(REMEMBER_STORAGE, remember ? '1' : '0');
+      safeStorageSet(REMEMBER_STORAGE, remember ? '1' : '0');
       hideKeyModal();
       showToast('Key 已保存 ✓');
-    }
+    };
 
-    document.getElementById('key-save-btn').onclick = handleKeySave;
     document.getElementById('api-key-input').onkeydown = (e) => {
-      if (e.key === 'Enter') handleKeySave();
+      if (e.key === 'Enter') window._handleKeySave();
     };
 
     // ── Toast ──────────────────────────────────────────────
