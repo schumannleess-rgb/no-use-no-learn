@@ -26,7 +26,7 @@
       --scene-meeting: #c0576a;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -648,6 +648,7 @@
       justify-content: center;
       z-index: 9999;
       padding: 20px;
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
     }
     .key-modal-overlay.hidden { display: none; }
     .key-modal-box {
@@ -714,10 +715,15 @@
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      pointer-events: auto;
     }
     .key-save-btn:hover { background: #6b7af0; }
-    .key-save-btn:active { transform: scale(0.98); }
+    .key-save-btn:active { transform: scale(0.98); background: #4a5adf; }
     .key-modal-footer {
       margin-top: 16px;
       font-size: 12px;
@@ -827,7 +833,7 @@
         autocomplete="off"
       />
       <div class="key-input-error" id="key-input-error"></div>
-      <button class="key-save-btn" id="key-save-btn" onclick="window._handleKeySave()">💾 保存并开始</button>
+      <button class="key-save-btn" id="key-save-btn">💾 保存并开始</button>
       <div class="key-modal-footer">
         <label class="key-remember">
           <input type="checkbox" id="key-remember" checked>
@@ -1551,6 +1557,8 @@ Be encouraging and natural.`;
       hideKeyModal();
       showToast('Key 已保存 ✓');
     };
+
+    document.getElementById('key-save-btn').onclick = window._handleKeySave;
 
     document.getElementById('api-key-input').onkeydown = (e) => {
       if (e.key === 'Enter') window._handleKeySave();
