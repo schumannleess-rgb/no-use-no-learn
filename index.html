@@ -1537,6 +1537,7 @@ Be encouraging and natural.`;
     }
 
     window._handleKeySave = function() {
+      console.log('[KEY] save button pressed');
       const input = document.getElementById('api-key-input');
       const errorEl = document.getElementById('key-input-error');
       const key = input.value.trim();
@@ -1558,7 +1559,12 @@ Be encouraging and natural.`;
       showToast('Key 已保存 ✓');
     };
 
-    document.getElementById('key-save-btn').onclick = window._handleKeySave;
+    var saveBtn = document.getElementById('key-save-btn');
+    saveBtn.addEventListener('click', window._handleKeySave, { passive: false });
+    saveBtn.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      window._handleKeySave();
+    }, { passive: false });
 
     document.getElementById('api-key-input').onkeydown = (e) => {
       if (e.key === 'Enter') window._handleKeySave();
