@@ -833,7 +833,7 @@
         autocomplete="off"
       />
       <div class="key-input-error" id="key-input-error"></div>
-      <button class="key-save-btn" id="key-save-btn" onclick="var _s=false;function _t(e){if(_s)return;_s=true;var i=document.getElementById('api-key-input');if(i&&i.tagName==='INPUT')i.blur();var k=i.value.trim();var r=document.getElementById('key-remember').checked;if(!k){document.getElementById('key-input-error').textContent='Key 不能为空';_s=false;return;}if(k.length<10){document.getElementById('key-input-error').textContent='Key 格式不对，请检查后重新粘贴';_s=false;return;}document.getElementById('key-input-error').textContent='';var REM='lingo-glm-remember',KEY='lingo-glm-key';function _ss(a,b){try{localStorage.setItem(a,b)}catch(e){}try{sessionStorage.setItem(a,b)}catch(e){}};_ss(KEY,k);_ss(REM,r?'1':'0');window._cachedKey=k;document.getElementById('key-modal').classList.add('hidden');var t=document.getElementById('toast');t.textContent='Key 已保存 ✓';t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2000);setTimeout(function(){_s=false},400);}_t(event);">💾 保存并开始</button>
+      <button class="key-save-btn" id="key-save-btn" onclick="var _s=false;function _t(e){if(_s)return;_s=true;var i=document.getElementById('api-key-input');if(i&&i.tagName==='INPUT')i.blur();var k=i.value.trim();var r=document.getElementById('key-remember').checked;if(!k){document.getElementById('key-input-error').textContent='Key 不能为空';_s=false;return;}if(k.length<10){document.getElementById('key-input-error').textContent='Key 格式不对，请检查后重新粘贴';_s=false;return;}document.getElementById('key-input-error').textContent='';var REM='lingo-glm-remember',KEY='lingo-glm-key';function _ss(a,b){try{localStorage.setItem(a,b)}catch(e){}try{sessionStorage.setItem(a,b)}catch(e){}};function _sc(n,v,days){var d=new Date();d.setTime(d.getTime()+days*86400000);document.cookie=n+'='+encodeURIComponent(v)+';expires='+d.toUTCString()+';path=/;SameSite=Lax';}_ss(KEY,k);_ss(REM,r?'1':'0');if(r){_sc(KEY,k,30);_sc(REM,'1',30);}else{try{localStorage.removeItem(KEY)}catch(e){}try{sessionStorage.removeItem(KEY)}catch(e){}_sc(KEY,k,1);_sc(REM,'0',30);}window._cachedKey=k;document.getElementById('key-modal').classList.add('hidden');var t=document.getElementById('toast');t.textContent='Key 已保存 ✓';t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2000);setTimeout(function(){_s=false},400);}_t(event);">💾 保存并开始</button>
       <div class="key-modal-footer">
         <label class="key-remember">
           <input type="checkbox" id="key-remember" checked>
@@ -1306,7 +1306,10 @@
       try { k = localStorage.getItem('lingo-glm-key') || localStorage.getItem('lingo-glm-key-session'); } catch(e) {}
       if (k) return k;
       try { k = sessionStorage.getItem('lingo-glm-key') || sessionStorage.getItem('lingo-glm-key-session'); } catch(e) {}
-      return k;
+      if (k) return k;
+      // Fallback: read from cookie
+      var match = document.cookie.match(/(^| )lingo-glm-key=([^;]+)/);
+      return match ? decodeURIComponent(match[2]) : null;
     }
     function saveKey(key, remember) {
       if (remember) {
@@ -1613,8 +1616,12 @@ Be encouraging and natural.`;
     // ── Init ──────────────────────────────────────────────
     window._cachedKey = null;
 
+    function _getCookie(name) {
+      var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      return match ? decodeURIComponent(match[2]) : null;
+    }
+
     window.addEventListener('load', () => {
-      // Try: localStorage → sessionStorage → current session cache
       var storedKey = null;
       try { storedKey = localStorage.getItem('lingo-glm-key') || localStorage.getItem('lingo-glm-key-session'); } catch(e) {}
       if (!storedKey) {
@@ -1622,6 +1629,9 @@ Be encouraging and natural.`;
       }
       if (!storedKey) {
         storedKey = window._cachedKey;
+      }
+      if (!storedKey) {
+        storedKey = _getCookie('lingo-glm-key');
       }
       if (storedKey) {
         document.getElementById('key-modal').classList.add('hidden');
