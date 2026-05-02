@@ -833,7 +833,7 @@
         autocomplete="off"
       />
       <div class="key-input-error" id="key-input-error"></div>
-      <button class="key-save-btn" id="key-save-btn" onclick="var _s=false;function _t(e){if(_s)return;_s=true;var i=document.getElementById('api-key-input');if(i&&i.tagName==='INPUT')i.blur();var k=i.value.trim();var r=document.getElementById('key-remember').checked;if(!k){document.getElementById('key-input-error').textContent='Key 不能为空';_s=false;return;}if(k.length<10){document.getElementById('key-input-error').textContent='Key 格式不对，请检查后重新粘贴';_s=false;return;}document.getElementById('key-input-error').textContent='';var REM='lingo-glm-remember',KEY='lingo-glm-key';function _ss(a,b){try{localStorage.setItem(a,b)}catch(e){}try{sessionStorage.setItem(a,b)}catch(e){}};function _sc(n,v,days){var d=new Date();d.setTime(d.getTime()+days*86400000);document.cookie=n+'='+encodeURIComponent(v)+';expires='+d.toUTCString()+';path=/;SameSite=Lax';}_ss(KEY,k);_ss(REM,r?'1':'0');if(r){_sc(KEY,k,30);_sc(REM,'1',30);}else{try{localStorage.removeItem(KEY)}catch(e){}try{sessionStorage.removeItem(KEY)}catch(e){}_sc(KEY,k,1);_sc(REM,'0',30);}window._cachedKey=k;document.getElementById('key-modal').classList.add('hidden');var t=document.getElementById('toast');t.textContent='Key 已保存 ✓';t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2000);setTimeout(function(){_s=false},400);}_t(event);">💾 保存并开始</button>
+      <button class="key-save-btn" id="key-save-btn" onclick="var _s=false;function _t(e){if(_s)return;_s=true;var i=document.getElementById('api-key-input');if(i&&i.tagName==='INPUT')i.blur();var k=i.value.trim();var r=document.getElementById('key-remember').checked;if(!k){document.getElementById('key-input-error').textContent='Key 不能为空';_s=false;return;}if(k.length<10){document.getElementById('key-input-error').textContent='Key 格式不对，请检查后重新粘贴';_s=false;return;}document.getElementById('key-input-error').textContent='';var REM='lingo-glm-remember',KEY='lingo-glm-key';function _ss(a,b){try{localStorage.setItem(a,b)}catch(e){}try{sessionStorage.setItem(a,b)}catch(e){}};function _sc(n,v,days){var d=new Date();d.setTime(d.getTime()+days*86400000);document.cookie=n+'='+encodeURIComponent(v)+';expires='+d.toUTCString()+';path=/;SameSite=Lax';}_ss(KEY,k);_ss(REM,r?'1':'0');if(r){_sc(KEY,k,30);_sc(REM,'1',30);}else{try{localStorage.removeItem(KEY)}catch(e){}try{sessionStorage.removeItem(KEY)}catch(e){}_sc(KEY,k,1);_sc(REM,'0',30);}window._cachedKey = k;window._cachedRemember=r;document.getElementById('key-modal').classList.add('hidden');var t=document.getElementById('toast');t.textContent='Key 已保存 ✓';t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2000);setTimeout(function(){_s=false},400);}_t(event);">💾 保存并开始</button>
       <div class="key-modal-footer">
         <label class="key-remember">
           <input type="checkbox" id="key-remember" checked>
@@ -1615,10 +1615,17 @@ Be encouraging and natural.`;
 
     // ── Init ──────────────────────────────────────────────
     window._cachedKey = null;
+    window._cachedRemember = null;
 
     function _getCookie(name) {
-      var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-      return match ? decodeURIComponent(match[2]) : null;
+      var cookies = document.cookie.split(';');
+      for (var i = 0; i < cookies.length; i++) {
+        var c = cookies[i].trim();
+        if (c.indexOf(name + '=') === 0) {
+          return decodeURIComponent(c.substring(name.length + 1));
+        }
+      }
+      return null;
     }
 
     window.addEventListener('load', () => {
@@ -1637,6 +1644,16 @@ Be encouraging and natural.`;
         document.getElementById('key-modal').classList.add('hidden');
       } else {
         showKeyModal(false);
+      }
+
+      // Restore remember checkbox state from cache or cookie
+      if (window._cachedRemember !== null) {
+        document.getElementById('key-remember').checked = window._cachedRemember;
+      } else {
+        var remCookie = _getCookie('lingo-glm-remember');
+        if (remCookie === '0') {
+          document.getElementById('key-remember').checked = false;
+        }
       }
 
       try {
