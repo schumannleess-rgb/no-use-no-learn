@@ -538,6 +538,19 @@
       -webkit-backdrop-filter: blur(12px);
     }
     #chat-panel .chat-header span { font-size: 16px; font-weight: 600; }
+    #chat-panel .chat-settings {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: rgba(255,255,255,0.7);
+      font-size: 18px;
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     #chat-panel .close-chat {
       background: rgba(255,255,255,0.1);
       border: none;
@@ -564,6 +577,8 @@
     .msg.user { background: rgba(91,106,240,0.5); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
     .msg .sender { font-size: 11px; opacity: 0.6; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
     .msg .ai-text { line-height: 1.5; }
+    .streaming-cursor { animation: blink 0.8s infinite; color: rgba(255,255,255,0.5); }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     .recommend-card {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.15);
@@ -828,6 +843,7 @@
   <div id="chat-panel">
     <div class="chat-header">
       <span>功利教授</span>
+      <button class="chat-settings" onclick="showKeyModal(false)" title="设置 API Key">⚙</button>
       <button class="close-chat" id="close-chat">✕</button>
     </div>
     <div id="chat-messages">
@@ -1421,7 +1437,7 @@
       return '';
     }
 
-    async function sendToAI(userText) {
+    async function sendToAI(userText, onChunk) {
       const active = state.sentences.filter(s => !s.learned);
       const activeEn = active.map(s => s.en).join('\n');
 
@@ -1546,16 +1562,17 @@
         const lastTopics = chatHistory.filter(m => m.role === 'user').slice(-3).map(m => m.content);
         searchQuery = lastTopics.join(' ');
       }
-      const refText = await fetchTopicKnowledge(searchQuery);
-      const fullSystemPrompt = systemPrompt + (refText ? `\n\n## Wikipedia 参考资料（以下来自维基百科，优先使用其中的事实和数据，不要偏离）\n${refText}` : '');
 
       const GLM_KEY = getStoredKey();
       if (!GLM_KEY) {
         throw new Error('NO_KEY');
       }
 
-      // GLM only — MiniMax text chat needs CORS proxy (use GLM for now)
       try {
+        // Fetch Wikipedia in parallel with LLM call preparation
+        const refText = await fetchTopicKnowledge(searchQuery);
+        const fullSystemPrompt = systemPrompt + (refText ? `\n\n## Wikipedia 参考资料（以下来自维基百科，优先使用其中的事实和数据，不要偏离）\n${refText}` : '');
+
         const res = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
           method: 'POST',
           headers: {
@@ -1570,7 +1587,8 @@
               { role: 'user', content: userText }
             ],
             temperature: 0.7,
-            max_tokens: 2048
+            max_tokens: 2048,
+            stream: true
           })
         });
 
@@ -1580,8 +1598,34 @@
           throw new Error('HTTP ' + res.status);
         }
 
-        const data = await res.json();
-        const reply = data.choices?.[0]?.message?.content || "不知道该怎么回复 — 请换个说法试试！";
+        // Parse SSE stream
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let fullText = '';
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const data = line.slice(6).trim();
+            if (data === '[DONE]') continue;
+            try {
+              const parsed = JSON.parse(data);
+              const delta = parsed.choices?.[0]?.delta?.content;
+              if (delta) {
+                fullText += delta;
+                if (typeof onChunk === 'function') onChunk(delta);
+              }
+            } catch(e) {}
+          }
+        }
+
+        const reply = fullText || "不知道该怎么回复 — 请换个说法试试！";
         chatHistory.push({ role: 'user', content: userText });
         chatHistory.push({ role: 'assistant', content: reply });
         if (chatHistory.length > 12) chatHistory = chatHistory.slice(-12);
@@ -1700,7 +1744,22 @@
 
       addMessage(text, 'user');
 
-      const reply = await sendToAI(text);
+      // Create a pending AI message that updates in real-time
+      const pendingDiv = document.createElement('div');
+      pendingDiv.className = 'msg ai';
+      pendingDiv.innerHTML = '<div class="sender">功利教授</div><div class="ai-text"><span class="streaming-cursor">▌</span></div>';
+      chatMessages.appendChild(pendingDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      let streamedText = '';
+      const reply = await sendToAI(text, function(delta) {
+        streamedText += delta;
+        pendingDiv.innerHTML = '<div class="sender">功利教授</div><div class="ai-text">' + escHtml(streamedText) + '<span class="streaming-cursor">▌</span></div>';
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      });
+
+      // Replace pending div with final rendered message
+      pendingDiv.remove();
       addMessage(reply, 'ai');
     }
 
